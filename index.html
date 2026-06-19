@@ -288,6 +288,28 @@
         .exam-modal .exam-btn.weak:hover { background: var(--warning); color: #fff; }
         .exam-modal .exam-btn.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
         .exam-modal .exam-btn.wrong:hover { background: var(--danger); color: #fff; }
+        .exam-modal .exam-btn.selected { color: #fff !important; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.35); transform: translateY(-1px); }
+        .exam-modal .exam-btn.correct.selected { background: var(--success); }
+        .exam-modal .exam-btn.weak.selected { background: var(--warning); }
+        .exam-modal .exam-btn.wrong.selected { background: var(--danger); }
+        .exam-modal .seq-status { margin-top: 10px; padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; display: none; }
+        .exam-modal .seq-status.correct { display:block; background: rgba(34,197,94,0.15); color: var(--success); border: 1px solid var(--success); }
+        .exam-modal .seq-status.weak { display:block; background: rgba(245,158,11,0.15); color: var(--warning); border: 1px solid var(--warning); }
+        .exam-modal .seq-status.wrong { display:block; background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .exam-modal .seq-ayah-correct { border: 2px solid var(--success) !important; background: rgba(34,197,94,0.08); border-radius: 10px; padding: 10px; }
+        .exam-modal .seq-ayah-weak { border: 2px solid var(--warning) !important; background: rgba(245,158,11,0.10); border-radius: 10px; padding: 10px; }
+        .exam-modal .seq-ayah-wrong { border: 2px solid var(--danger) !important; background: rgba(239,68,68,0.10); border-radius: 10px; padding: 10px; }
+        .exam-question-count-grid { display:grid; grid-template-columns: repeat(4, minmax(60px, 1fr)); gap:10px; margin-top:15px; }
+        .review-ayah-list { margin-top:15px; text-align:right; display:grid; gap:8px; }
+        .review-ayah-item { background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; padding:10px; cursor:pointer; transition:0.2s; font-size:13px; }
+        .review-ayah-item:hover { border-color:var(--gold); }
+        .ayah-span.needs-review-weak { background: rgba(245,158,11,0.18) !important; border-bottom: 2px solid var(--warning); }
+        .ayah-span.needs-review-wrong { background: rgba(239,68,68,0.18) !important; border-bottom: 2px solid var(--danger); }
+        .ayah-span.needs-review-reviewing { background: rgba(59,130,246,0.16) !important; border-bottom: 2px solid var(--info); }
+        .review-action-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+        .review-action-row .btn { padding:7px 10px; font-size:11px; }
+        .exam-reveal-box { display:none; background:var(--bg-dark); border:1px dashed var(--gold); border-radius:10px; padding:14px; margin:12px 0; font-family:'Amiri',serif; font-size:20px; line-height:2; text-align:center; }
+        .exam-reveal-box.active { display:block; }
         .exam-modal .exam-result { text-align: center; padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; }
         .exam-modal .exam-result.good { background: rgba(34, 197, 94, 0.15); color: var(--success); }
         .exam-modal .exam-result.medium { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
@@ -492,21 +514,21 @@
                     <div class="form-group">
                         <label>نطاق الحفظ</label>
                         <select id="mem-plan-scope" onchange="updateMemPlanCalc()">
-                            <option value="full">المصحف كاملاً (30 جزء)</option>
-                            <option value="half">نصف المصحف (15 جزء)</option>
-                            <option value="juz10">10 أجزاء</option>
-                            <option value="juz5">5 أجزاء</option>
-                            <option value="juz3">3 أجزاء</option>
-                            <option value="custom">تحديد مخصص (من جزء إلى جزء)</option>
+                            <option value="full">حفظ القرآن كاملاً</option>
+                            <option value="juz-list">حفظ جزء أو أكثر</option>
+                            <option value="surah-list">حفظ سورة أو أكثر</option>
                         </select>
+                        <div class="form-hint">الخطة ستوزّع النطاق المختار على أيام الحفظ بحسب السور والآيات، والصفحات تظهر كمعلومة مساعدة.</div>
                     </div>
 
-                    <div class="form-group" id="mem-custom-range" style="display:none;">
-                        <label>النطاق المخصص</label>
-                        <div style="display:flex; gap:10px;">
-                            <select id="mem-start-juz"><option value="1">من الجزء 1</option></select>
-                            <select id="mem-end-juz"><option value="30">إلى الجزء 30</option></select>
-                        </div>
+                    <div class="form-group" id="mem-juz-checkbox-group" style="display:none;">
+                        <label>اختر الأجزاء المطلوبة</label>
+                        <div id="mem-juz-checkboxes" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(105px,1fr)); gap:8px; max-height:220px; overflow-y:auto; background:var(--bg-dark); border:1px solid var(--border); border-radius:10px; padding:10px;"></div>
+                    </div>
+
+                    <div class="form-group" id="mem-surah-checkbox-group" style="display:none;">
+                        <label>اختر السور المطلوبة</label>
+                        <div id="mem-surah-checkboxes" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; max-height:260px; overflow-y:auto; background:var(--bg-dark); border:1px solid var(--border); border-radius:10px; padding:10px;"></div>
                     </div>
 
                     <div class="form-group">
@@ -766,6 +788,7 @@
         let memPlans = [];
         let currentMemPlanId = null;
         let currentMemDayIdx = null;
+        let activeExamContext = null;
         let ayahSearchIndex = [];
         let searchDebounceTimer = null;
         let ayahMap = null;
@@ -972,116 +995,125 @@
             });
         }
 
-        // ===== MEMORIZATION PLAN SYSTEM - ENHANCED =====
+        // ===== MEMORIZATION PLAN SYSTEM - AYAH-BASED =====
         function populateMemJuzSelects() {
-            let startSel = document.getElementById('mem-start-juz');
-            let endSel = document.getElementById('mem-end-juz');
-            if (!startSel || !endSel) return;
-            startSel.innerHTML = '';
-            endSel.innerHTML = '';
-            for (let i = 1; i <= 30; i++) {
-                startSel.innerHTML += `<option value="${i}">من الجزء ${formatArabicPageNumber(i)}</option>`;
-                endSel.innerHTML += `<option value="${i}" ${i === 30 ? 'selected' : ''}>إلى الجزء ${formatArabicPageNumber(i)}</option>`;
-            }
-        }
-
-        function getTotalPagesInRange(startJuz, endJuz) {
-            let total = 0;
-            for (let j = startJuz; j <= endJuz; j++) {
-                total += JUZ_PAGE_MAP[j].pages;
-            }
-            return total;
-        }
-
-        function getPagesForDay(startJuz, endJuz, totalDays, dayIndex, pattern) {
-            let totalPages = getTotalPagesInRange(startJuz, endJuz);
-            let memorizeDays = 0;
-
-            // Calculate how many memorize days based on pattern
-            for (let d = 1; d <= totalDays; d++) {
-                let dayType = getDayType(d, pattern, totalDays);
-                if (dayType === 'memorize') memorizeDays++;
-            }
-
-            if (memorizeDays === 0) memorizeDays = totalDays;
-            let pagesPerMemDay = Math.ceil(totalPages / memorizeDays);
-
-            // Generate schedule
-            let schedule = [];
-            let currentPage = JUZ_PAGE_MAP[startJuz].start;
-            let currentJuz = startJuz;
-            let pagesInCurrentJuz = 0;
-
-            for (let day = 1; day <= totalDays; day++) {
-                let dayType = getDayType(day, pattern, totalDays);
-                let dayPages = 0;
-                let dayStartPage = currentPage;
-                let dayEndPage = currentPage;
-
-                if (dayType === 'memorize') {
-                    dayPages = Math.min(pagesPerMemDay, JUZ_PAGE_MAP[currentJuz].end - currentPage + 1);
-                    dayEndPage = currentPage + dayPages - 1;
-
-                    // Don't exceed current juz
-                    if (dayEndPage > JUZ_PAGE_MAP[currentJuz].end) {
-                        dayEndPage = JUZ_PAGE_MAP[currentJuz].end;
-                        dayPages = dayEndPage - dayStartPage + 1;
-                    }
-
-                    currentPage = dayEndPage + 1;
-                    pagesInCurrentJuz += dayPages;
-
-                    // Move to next juz if current is done
-                    if (currentPage > JUZ_PAGE_MAP[currentJuz].end) {
-                        currentJuz++;
-                        if (currentJuz <= endJuz) {
-                            currentPage = JUZ_PAGE_MAP[currentJuz].start;
-                            pagesInCurrentJuz = 0;
-                        }
-                    }
-                } else {
-                    // Review day - review previous memorize days
-                    let reviewStart = dayStartPage;
-                    let reviewEnd = dayEndPage;
-                    // Find the range to review
-                    let lastMemDay = schedule.slice().reverse().find(d => d.type === 'memorize');
-                    if (lastMemDay) {
-                        reviewStart = JUZ_PAGE_MAP[startJuz].start;
-                        reviewEnd = lastMemDay.endPage;
-                    }
-                    dayStartPage = reviewStart;
-                    dayEndPage = reviewEnd;
+            let juzBox = document.getElementById('mem-juz-checkboxes');
+            if (juzBox) {
+                juzBox.innerHTML = '';
+                for (let i = 1; i <= 30; i++) {
+                    juzBox.innerHTML += `
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px; color:var(--text-main); background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:8px;">
+                            <input type="checkbox" class="mem-juz-check" value="${i}" onchange="updateMemPlanCalc()">
+                            <span>الجزء ${formatArabicPageNumber(i)}</span>
+                        </label>`;
                 }
+            }
 
-                schedule.push({
-                    day: day,
-                    type: dayType,
-                    juz: currentJuz <= endJuz ? currentJuz : endJuz,
-                    startPage: dayStartPage,
-                    endPage: dayEndPage,
-                    completed: false,
-                    examDay: shouldBeExamDay(day, document.getElementById('mem-exam-freq').value, dayType)
+            let surahBox = document.getElementById('mem-surah-checkboxes');
+            if (surahBox && quranData && quranData.length) {
+                surahBox.innerHTML = '';
+                quranData.forEach((surah) => {
+                    surahBox.innerHTML += `
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:12px; color:var(--text-main); background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:8px;">
+                            <input type="checkbox" class="mem-surah-check" value="${surah.number}" onchange="updateMemPlanCalc()">
+                            <span>${surah.number}. ${surah.name}</span>
+                        </label>`;
                 });
             }
+        }
 
-            return schedule;
+        function getCheckedValues(selector) {
+            return Array.from(document.querySelectorAll(selector + ':checked')).map(cb => parseInt(cb.value)).filter(Boolean);
+        }
+
+        function getMemScopeSelection() {
+            let scope = document.getElementById('mem-plan-scope').value;
+            if (scope === 'full') {
+                return { type: 'full', label: 'القرآن كاملاً', juzs: Array.from({length: 30}, (_, i) => i + 1), surahs: [] };
+            }
+            if (scope === 'juz-list') {
+                let juzs = getCheckedValues('.mem-juz-check').sort((a,b) => a-b);
+                return { type: 'juz-list', label: juzs.length ? `الأجزاء: ${juzs.map(n => formatArabicPageNumber(n)).join('، ')}` : 'لم يتم اختيار أجزاء', juzs, surahs: [] };
+            }
+            let surahs = getCheckedValues('.mem-surah-check').sort((a,b) => a-b);
+            let names = surahs.map(n => (quranData[n-1] ? quranData[n-1].name : n));
+            return { type: 'surah-list', label: surahs.length ? `السور: ${names.join('، ')}` : 'لم يتم اختيار سور', juzs: [], surahs };
+        }
+
+        function getPlanAyahItems(selection) {
+            let items = [];
+            quranData.forEach((surah, sIdx) => {
+                surah.ayahs.forEach((ayah) => {
+                    let include = false;
+                    if (selection.type === 'full') include = true;
+                    else if (selection.type === 'juz-list') include = selection.juzs.includes(ayah.juz);
+                    else if (selection.type === 'surah-list') include = selection.surahs.includes(surah.number);
+                    if (include) {
+                        items.push({
+                            surahIdx: sIdx,
+                            surahNum: surah.number,
+                            surahName: surah.name,
+                            ayahNum: ayah.numberInSurah,
+                            page: ayah.page,
+                            juz: ayah.juz,
+                            text: ayah.text,
+                            key: `${surah.number}_${ayah.numberInSurah}`
+                        });
+                    }
+                });
+            });
+            let seen = new Set();
+            return items.filter(item => {
+                if (seen.has(item.key)) return false;
+                seen.add(item.key);
+                return true;
+            });
+        }
+
+        function summarizeAyahRange(items) {
+            if (!items || items.length === 0) {
+                return { text: 'لا توجد آيات في هذا اليوم', shortText: 'لا توجد آيات', ayahCount: 0, startPage: 1, endPage: 1, startJuz: 1, endJuz: 1 };
+            }
+            let first = items[0];
+            let last = items[items.length - 1];
+            let sameSurah = first.surahNum === last.surahNum;
+            let text = sameSurah
+                ? `من ${formatSurahHeaderName(first.surahName)} آية ${formatArabicPageNumber(first.ayahNum)} إلى آية ${formatArabicPageNumber(last.ayahNum)}`
+                : `من ${formatSurahHeaderName(first.surahName)} آية ${formatArabicPageNumber(first.ayahNum)} إلى ${formatSurahHeaderName(last.surahName)} آية ${formatArabicPageNumber(last.ayahNum)}`;
+            return {
+                text,
+                shortText: sameSurah ? `${first.surahName}: ${first.ayahNum}-${last.ayahNum}` : `${first.surahName} ${first.ayahNum} ← ${last.surahName} ${last.ayahNum}`,
+                ayahCount: items.length,
+                startPage: first.page,
+                endPage: last.page,
+                startJuz: first.juz,
+                endJuz: last.juz,
+                startSurah: first.surahNum,
+                startAyah: first.ayahNum,
+                endSurah: last.surahNum,
+                endAyah: last.ayahNum
+            };
+        }
+
+        function getMemorizeDaysCount(totalDays, pattern) {
+            let count = 0;
+            for (let d = 1; d <= totalDays; d++) {
+                if (getDayType(d, pattern, totalDays) === 'memorize') count++;
+            }
+            return Math.max(count, 1);
         }
 
         function getDayType(day, pattern, totalDays) {
-            if (pattern === '6-1') {
-                return (day % 7 === 0) ? 'review' : 'memorize';
-            } else if (pattern === '5-2') {
+            if (pattern === '6-1') return (day % 7 === 0) ? 'review' : 'memorize';
+            if (pattern === '5-2') {
                 let dayOfWeek = (day - 1) % 7;
                 return (dayOfWeek === 5 || dayOfWeek === 6) ? 'review' : 'memorize';
-            } else if (pattern === 'daily-review') {
-                return 'memorize'; // Both every day
-            } else if (pattern === 'custom') {
+            }
+            if (pattern === 'daily-review') return 'memorize';
+            if (pattern === 'custom') {
                 let checkboxes = document.querySelectorAll('.mem-day-check');
                 let dayOfWeek = (day - 1) % 7;
-                if (checkboxes[dayOfWeek]) {
-                    return checkboxes[dayOfWeek].checked ? 'memorize' : 'review';
-                }
-                return 'memorize';
+                if (checkboxes[dayOfWeek]) return checkboxes[dayOfWeek].checked ? 'memorize' : 'review';
             }
             return 'memorize';
         }
@@ -1091,8 +1123,83 @@
             if (freq === 'daily' && dayType === 'memorize') return true;
             if (freq === '3days' && dayType === 'memorize') return day % 3 === 0;
             if (freq === 'weekly' && dayType === 'memorize') return day % 7 === 0;
-            if (freq === 'juz') return false; // Handled separately
+            if (freq === 'juz') return false;
             return false;
+        }
+
+        function buildAyahBasedSchedule(items, totalDays, pattern, examFreq) {
+            let memorizeDays = getMemorizeDaysCount(totalDays, pattern);
+            let ayahsPerMemDay = Math.ceil(items.length / memorizeDays);
+            let cursor = 0;
+            let schedule = [];
+            let memorizedSoFar = [];
+
+            for (let day = 1; day <= totalDays; day++) {
+                let dayType = getDayType(day, pattern, totalDays);
+                let dayItems = [];
+                let reviewItems = [];
+
+                if (dayType === 'memorize') {
+                    dayItems = items.slice(cursor, Math.min(cursor + ayahsPerMemDay, items.length));
+                    cursor += dayItems.length;
+                    memorizedSoFar = memorizedSoFar.concat(dayItems);
+
+                    if (pattern === 'daily-review' && schedule.length > 0) {
+                        let recentMemDays = schedule.filter(d => d.type === 'memorize' && d.ayahItems && d.ayahItems.length).slice(-2);
+                        reviewItems = recentMemDays.flatMap(d => d.ayahItems);
+                    }
+                } else {
+                    let recentMemDays = schedule.filter(d => d.type === 'memorize' && d.ayahItems && d.ayahItems.length).slice(-3);
+                    reviewItems = recentMemDays.flatMap(d => d.ayahItems);
+                    dayItems = reviewItems;
+                }
+
+                let summary = summarizeAyahRange(dayItems);
+                let reviewSummary = summarizeAyahRange(reviewItems);
+                schedule.push({
+                    day,
+                    type: dayType,
+                    juz: summary.startJuz || 1,
+                    startPage: summary.startPage,
+                    endPage: summary.endPage,
+                    startSurah: summary.startSurah,
+                    startAyah: summary.startAyah,
+                    endSurah: summary.endSurah,
+                    endAyah: summary.endAyah,
+                    ayahCount: summary.ayahCount,
+                    rangeText: summary.text,
+                    shortRangeText: summary.shortText,
+                    ayahItems: dayItems,
+                    reviewItems,
+                    reviewText: reviewItems.length ? reviewSummary.text : '',
+                    completed: false,
+                    examDay: shouldBeExamDay(day, examFreq, dayType)
+                });
+            }
+            return schedule;
+        }
+
+        function getPlanCompletedStats(plan, upToDayIdx = null) {
+            let doneKeys = new Set();
+            let days = upToDayIdx === null ? plan.schedule : plan.schedule.slice(0, upToDayIdx + 1);
+            days.forEach(day => {
+                if (day.completed && day.type === 'memorize' && day.ayahItems) {
+                    day.ayahItems.forEach(a => doneKeys.add(a.key));
+                }
+            });
+            let totalBySurah = {};
+            let doneBySurah = {};
+            (plan.ayahItems || []).forEach(a => {
+                totalBySurah[a.surahNum] = (totalBySurah[a.surahNum] || 0) + 1;
+                if (doneKeys.has(a.key)) doneBySurah[a.surahNum] = (doneBySurah[a.surahNum] || 0) + 1;
+            });
+            let completedSurahs = Object.keys(totalBySurah).filter(s => totalBySurah[s] === (doneBySurah[s] || 0)).map(Number);
+            return {
+                completedAyahs: doneKeys.size,
+                totalAyahs: (plan.ayahItems || []).length,
+                completedSurahs,
+                completedSurahNames: completedSurahs.map(n => quranData[n - 1] ? quranData[n - 1].name : n)
+            };
         }
 
         function renderMemPlansList() {
@@ -1113,34 +1220,20 @@
                 let progress = Math.round((completedDays / totalDays) * 100);
                 let currentDay = plan.schedule.find(d => !d.completed);
                 let currentDayNum = currentDay ? plan.schedule.indexOf(currentDay) + 1 : totalDays;
-                let totalPages = getTotalPagesInRange(plan.startJuz, plan.endJuz);
-
+                let stats = getPlanCompletedStats(plan);
                 return `
                     <div class="mem-plan-card" onclick="openMemPlanDetail(${idx})" style="cursor:pointer;">
                         <h3><i class="fas fa-book-open"></i> ${plan.name}</h3>
-                        <div class="plan-stat">
-                            <span class="stat-label">التقدم</span>
-                            <span class="stat-value">${completedDays}/${totalDays} يوم (${progress}%)</span>
-                        </div>
-                        <div class="mem-plan-progress">
-                            <div class="mem-plan-progress-fill" style="width:${progress}%"></div>
-                        </div>
-                        <div class="plan-stat">
-                            <span class="stat-label">النطاق</span>
-                            <span class="stat-value">جزء ${plan.startJuz} إلى ${plan.endJuz} (${totalPages} صفحة)</span>
-                        </div>
-                        <div class="plan-stat">
-                            <span class="stat-label">اليوم الحالي</span>
-                            <span class="stat-value">${currentDay ? `يوم ${currentDayNum} - صفحة ${currentDay.startPage}` : 'مكتمل!'}</span>
-                        </div>
+                        <div class="plan-stat"><span class="stat-label">التقدم الزمني</span><span class="stat-value">${completedDays}/${totalDays} يوم (${progress}%)</span></div>
+                        <div class="mem-plan-progress"><div class="mem-plan-progress-fill" style="width:${progress}%"></div></div>
+                        <div class="plan-stat"><span class="stat-label">النطاق</span><span class="stat-value">${plan.scopeLabel}</span></div>
+                        <div class="plan-stat"><span class="stat-label">الآيات المنجزة</span><span class="stat-value">${stats.completedAyahs}/${stats.totalAyahs} آية</span></div>
+                        <div class="plan-stat"><span class="stat-label">اليوم الحالي</span><span class="stat-value">${currentDay ? `يوم ${currentDayNum} - ${currentDay.shortRangeText}` : 'مكتمل!'}</span></div>
                         <div style="margin-top:10px; font-size:11px; color:var(--text-muted);">
-                            ${plan.pattern === '6-1' ? '٦ أيام حفظ + يوم مراجعة' : 
-                              plan.pattern === '5-2' ? '٥ أيام حفظ + يومان مراجعة' : 
-                              plan.pattern === 'daily-review' ? 'حفظ يومي + مراجعة يومية' : 'تخصيص يدوي'}
+                            ${plan.pattern === '6-1' ? '٦ أيام حفظ + يوم مراجعة' : plan.pattern === '5-2' ? '٥ أيام حفظ + يومان مراجعة' : plan.pattern === 'daily-review' ? 'حفظ يومي + مراجعة يومية' : 'تخصيص يدوي'}
                             ${plan.examFreq !== 'none' ? ' | مع امتحانات ' + plan.examFreq : ''}
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }).join('');
         }
 
@@ -1156,129 +1249,68 @@
         }
 
         function updateMemPlanCalc() {
-            let scope = document.getElementById('mem-plan-scope').value;
             let days = parseInt(document.getElementById('mem-plan-days').value) || 30;
             let pattern = document.getElementById('mem-plan-pattern').value;
+            let selection = getMemScopeSelection();
 
-            document.getElementById('mem-custom-range').style.display = (scope === 'custom') ? 'block' : 'none';
+            document.getElementById('mem-juz-checkbox-group').style.display = (selection.type === 'juz-list') ? 'block' : 'none';
+            document.getElementById('mem-surah-checkbox-group').style.display = (selection.type === 'surah-list') ? 'block' : 'none';
             document.getElementById('mem-custom-pattern').style.display = (pattern === 'custom') ? 'block' : 'none';
 
-            let startJuz = 1, endJuz = 30;
-            if (scope === 'custom') {
-                startJuz = parseInt(document.getElementById('mem-start-juz').value) || 1;
-                endJuz = parseInt(document.getElementById('mem-end-juz').value) || 30;
-            } else if (scope === 'half') { startJuz = 1; endJuz = 15; }
-            else if (scope === 'juz10') { startJuz = 1; endJuz = 10; }
-            else if (scope === 'juz5') { startJuz = 1; endJuz = 5; }
-            else if (scope === 'juz3') { startJuz = 1; endJuz = 3; }
+            let items = getPlanAyahItems(selection);
+            let memorizeDays = getMemorizeDaysCount(days, pattern);
+            let dailyAyahs = items.length ? Math.ceil(items.length / memorizeDays) : 0;
+            let firstLast = summarizeAyahRange(items);
 
-            let totalPages = getTotalPagesInRange(startJuz, endJuz);
-            let memorizeDays = 0;
-            for (let d = 1; d <= days; d++) {
-                if (getDayType(d, pattern, days) === 'memorize') memorizeDays++;
+            let warning = '';
+            if ((selection.type === 'juz-list' && selection.juzs.length === 0) || (selection.type === 'surah-list' && selection.surahs.length === 0)) {
+                warning = `<div style="color:var(--warning);"><i class="fas fa-exclamation-triangle"></i> اختر على الأقل ${selection.type === 'juz-list' ? 'جزءاً واحداً' : 'سورة واحدة'} لإنشاء الخطة.</div>`;
             }
-            let dailyPages = memorizeDays > 0 ? Math.ceil(totalPages / memorizeDays) : totalPages;
 
-            let summaryHTML = `
-                <div><i class="fas fa-book" style="color:var(--gold);"></i> <strong>النطاق:</strong> من الجزء ${startJuz} إلى الجزء ${endJuz} (${totalPages} صفحة حقيقية)</div>
-                <div><i class="fas fa-calendar" style="color:var(--gold);"></i> <strong>المدة:</strong> ${days} يوم</div>
-                <div><i class="fas fa-bullseye" style="color:var(--gold);"></i> <strong>أيام الحفظ:</strong> ${memorizeDays} يوم</div>
-                <div><i class="fas fa-calculator" style="color:var(--gold);"></i> <strong>الهدف اليومي:</strong> ~${dailyPages} صفحة/يوم حفظ</div>
-            `;
-            document.getElementById('mem-plan-summary').innerHTML = summaryHTML;
+            document.getElementById('mem-plan-summary').innerHTML = `
+                ${warning}
+                <div><i class="fas fa-book" style="color:var(--gold);"></i> <strong>النطاق:</strong> ${selection.label}</div>
+                <div><i class="fas fa-map-marker-alt" style="color:var(--gold);"></i> <strong>من/إلى:</strong> ${items.length ? firstLast.text : 'غير محدد بعد'}</div>
+                <div><i class="fas fa-list-ol" style="color:var(--gold);"></i> <strong>عدد الآيات:</strong> ${formatArabicPageNumber(items.length)} آية</div>
+                <div><i class="fas fa-calendar" style="color:var(--gold);"></i> <strong>المدة:</strong> ${formatArabicPageNumber(days)} يوم</div>
+                <div><i class="fas fa-bullseye" style="color:var(--gold);"></i> <strong>أيام الحفظ:</strong> ${formatArabicPageNumber(memorizeDays)} يوم</div>
+                <div><i class="fas fa-calculator" style="color:var(--gold);"></i> <strong>المتوسط اليومي:</strong> ~${formatArabicPageNumber(dailyAyahs)} آية/يوم حفظ</div>`;
         }
 
         function createMemPlan() {
             let name = document.getElementById('mem-plan-name').value.trim() || 'خطة حفظ جديدة';
-            let scope = document.getElementById('mem-plan-scope').value;
             let days = parseInt(document.getElementById('mem-plan-days').value) || 30;
             let pattern = document.getElementById('mem-plan-pattern').value;
             let examFreq = document.getElementById('mem-exam-freq').value;
+            let selection = getMemScopeSelection();
+            let items = getPlanAyahItems(selection);
 
-            let startJuz = 1, endJuz = 30;
-            if (scope === 'custom') {
-                startJuz = parseInt(document.getElementById('mem-start-juz').value) || 1;
-                endJuz = parseInt(document.getElementById('mem-end-juz').value) || 30;
-            } else if (scope === 'half') { startJuz = 1; endJuz = 15; }
-            else if (scope === 'juz10') { startJuz = 1; endJuz = 10; }
-            else if (scope === 'juz5') { startJuz = 1; endJuz = 5; }
-            else if (scope === 'juz3') { startJuz = 1; endJuz = 3; }
-
-            let schedule = getPagesForDay(startJuz, endJuz, days, 0, pattern);
-            // Fix: regenerate with proper exam days
-            schedule = [];
-            let currentPage = JUZ_PAGE_MAP[startJuz].start;
-            let currentJuz = startJuz;
-            let totalPages = getTotalPagesInRange(startJuz, endJuz);
-            let memorizeDays = 0;
-            for (let d = 1; d <= days; d++) {
-                if (getDayType(d, pattern, days) === 'memorize') memorizeDays++;
-            }
-            let pagesPerMemDay = Math.ceil(totalPages / Math.max(memorizeDays, 1));
-
-            for (let day = 1; day <= days; day++) {
-                let dayType = getDayType(day, pattern, days);
-                let dayStartPage = currentPage;
-                let dayEndPage = currentPage;
-                let dayJuz = currentJuz;
-
-                if (dayType === 'memorize' && currentJuz <= endJuz) {
-                    let remainingInJuz = JUZ_PAGE_MAP[currentJuz].end - currentPage + 1;
-                    let pagesToday = Math.min(pagesPerMemDay, remainingInJuz);
-                    dayEndPage = currentPage + pagesToday - 1;
-
-                    currentPage = dayEndPage + 1;
-                    if (currentPage > JUZ_PAGE_MAP[currentJuz].end) {
-                        currentJuz++;
-                        if (currentJuz <= endJuz) {
-                            currentPage = JUZ_PAGE_MAP[currentJuz].start;
-                        }
-                    }
-                } else {
-                    // Review day - review from start to last memorized page
-                    let lastMemDay = null;
-                    for (let i = schedule.length - 1; i >= 0; i--) {
-                        if (schedule[i].type === 'memorize') {
-                            lastMemDay = schedule[i];
-                            break;
-                        }
-                    }
-                    if (lastMemDay) {
-                        dayStartPage = JUZ_PAGE_MAP[startJuz].start;
-                        dayEndPage = lastMemDay.endPage;
-                        dayJuz = lastMemDay.juz;
-                    } else {
-                        dayStartPage = JUZ_PAGE_MAP[startJuz].start;
-                        dayEndPage = JUZ_PAGE_MAP[startJuz].start;
-                    }
-                }
-
-                schedule.push({
-                    day: day,
-                    type: dayType,
-                    juz: dayJuz,
-                    startPage: dayStartPage,
-                    endPage: dayEndPage,
-                    completed: false,
-                    examDay: shouldBeExamDay(day, examFreq, dayType)
-                });
+            if (items.length === 0) {
+                alert('يرجى اختيار نطاق صالح للخطة: القرآن كاملاً، أو جزء/أجزاء، أو سورة/سور.');
+                return;
             }
 
+            let schedule = buildAyahBasedSchedule(items, days, pattern, examFreq);
+            let firstLast = summarizeAyahRange(items);
             let plan = {
                 id: Date.now(),
-                name: name,
-                startJuz: startJuz,
-                endJuz: endJuz,
+                name,
+                scopeType: selection.type,
+                scopeLabel: selection.label,
+                selectedJuzs: selection.juzs || [],
+                selectedSurahs: selection.surahs || [],
                 totalDays: days,
-                pattern: pattern,
-                examFreq: examFreq,
-                schedule: schedule,
+                pattern,
+                examFreq,
+                totalAyahs: items.length,
+                rangeText: firstLast.text,
+                ayahItems: items,
+                schedule,
                 createdAt: new Date().toISOString()
             };
 
             memPlans.push(plan);
             localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
-
             hideMemSetup();
             renderMemPlansList();
         }
@@ -1294,6 +1326,7 @@
             let completedDays = plan.schedule.filter(d => d.completed).length;
             let progress = Math.round((completedDays / totalDays) * 100);
             let currentDay = plan.schedule.find(d => !d.completed);
+            let stats = getPlanCompletedStats(plan);
 
             let html = `
                 <div style="background:var(--bg-card); border:1px solid var(--gold); border-radius:12px; padding:20px; margin-bottom:20px;">
@@ -1301,53 +1334,42 @@
                         <span style="color:var(--text-muted); font-size:13px;">التقدم العام</span>
                         <span style="color:var(--gold); font-weight:bold;">${progress}%</span>
                     </div>
-                    <div class="mem-plan-progress">
-                        <div class="mem-plan-progress-fill" style="width:${progress}%"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px;">
-                        <span style="color:var(--text-muted);">${completedDays} من ${totalDays} يوم</span>
-                        <span style="color:var(--success);">${totalDays - completedDays} متبقي</span>
+                    <div class="mem-plan-progress"><div class="mem-plan-progress-fill" style="width:${progress}%"></div></div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; margin-top:12px; font-size:12px;">
+                        <div style="color:var(--text-muted);">النطاق: <span style="color:var(--gold); font-weight:bold;">${plan.scopeLabel}</span></div>
+                        <div style="color:var(--text-muted);">الآيات: <span style="color:var(--gold); font-weight:bold;">${stats.completedAyahs}/${stats.totalAyahs}</span></div>
+                        <div style="color:var(--text-muted);">السور المكتملة: <span style="color:var(--gold); font-weight:bold;">${stats.completedSurahs.length}</span></div>
                     </div>
                     ${currentDay ? `
                     <div style="margin-top:15px; padding:10px; background:var(--bg-dark); border-radius:8px; border:1px dashed var(--gold);">
                         <div style="color:var(--gold); font-weight:bold; margin-bottom:5px;"><i class="fas fa-calendar-day"></i> اليوم الحالي: يوم ${plan.schedule.indexOf(currentDay) + 1}</div>
-                        <div style="color:var(--text-main); font-size:13px;">
-                            ${currentDay.type === 'memorize' ? '📖 حفظ جديد' : '🔄 مراجعة'}: 
-                            صفحة ${currentDay.startPage} إلى ${currentDay.endPage} 
-                            (جزء ${currentDay.juz})
+                        <div style="color:var(--text-main); font-size:13px; line-height:1.8;">
+                            ${currentDay.type === 'memorize' ? '📖 حفظ جديد' : '🔄 مراجعة'}: ${currentDay.rangeText}<br>
+                            عدد الآيات: ${formatArabicPageNumber(currentDay.ayahCount)} | الصفحات: ${formatArabicPageNumber(currentDay.startPage)} - ${formatArabicPageNumber(currentDay.endPage)}
+                            ${currentDay.reviewText ? `<br>مراجعة مرافقة: ${currentDay.reviewText}` : ''}
                         </div>
-                        <div style="margin-top:10px; display:flex; gap:8px;">
-                            <button class="btn btn-success" style="flex:1; padding:8px; font-size:12px;" onclick="startMemPlanReading(${idx})">
-                                <i class="fas fa-play"></i> ابدأ الحفظ
-                            </button>
-                            ${currentDay.examDay ? `
-                            <button class="btn btn-info" style="flex:1; padding:8px; font-size:12px;" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})">
-                                <i class="fas fa-clipboard-check"></i> امتحان
-                            </button>
-                            ` : ''}
+                        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                            <button class="btn btn-success" style="flex:1; min-width:140px; padding:8px; font-size:12px;" onclick="startMemPlanReading(${idx})"><i class="fas fa-play"></i> ${currentDay.type === 'memorize' ? 'ابدأ الحفظ' : 'ابدأ المراجعة'}</button>
+                            <button class="btn btn-info" style="flex:1; min-width:140px; padding:8px; font-size:12px;" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-clipboard-check"></i> امتحان بنطاق تختاره</button>
                         </div>
-                    </div>
-                    ` : `
+                    </div>` : `
                     <div style="margin-top:15px; padding:10px; background:rgba(34,197,94,0.1); border-radius:8px; border:1px solid var(--success);">
-                        <div style="color:var(--success); font-weight:bold; text-align:center;">
-                            <i class="fas fa-trophy"></i> مبارك! لقد أكملت هذه الخطة بنجاح!
-                        </div>
+                        <div style="color:var(--success); font-weight:bold; text-align:center;"><i class="fas fa-trophy"></i> مبارك! أكملت هذه الخطة بنجاح.</div>
+                    </div>`}
+                    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn btn-info" style="flex:1; min-width:180px; padding:9px; font-size:12px;" onclick="openPlanReviewQueue(${idx})"><i class="fas fa-notes-medical"></i> آيات تحتاج مراجعة (${(plan.reviewQueue || []).length})</button>
                     </div>
-                    `}
                 </div>
 
                 <h3 style="color:var(--gold); margin-bottom:15px; font-size:16px;"><i class="fas fa-calendar-alt"></i> جدول الخطة الكامل</h3>
-                <div class="mem-plan-days">
-            `;
+                <div class="mem-plan-days">`;
 
             plan.schedule.forEach((day, dayIdx) => {
                 let dayClass = day.completed ? 'completed' : day.type;
                 let isCurrent = !day.completed && plan.schedule.slice(0, dayIdx).every(d => d.completed);
                 if (isCurrent) dayClass += ' current';
-
-                let title = day.type === 'memorize' ? `حفظ: صفحة ${day.startPage}-${day.endPage}` : `مراجعة: صفحة ${day.startPage}-${day.endPage}`;
+                let title = `${day.type === 'memorize' ? 'حفظ' : 'مراجعة'}: ${day.rangeText} (${day.ayahCount} آية)`;
                 if (day.examDay) title += ' (مع امتحان)';
-
                 html += `<div class="mem-day-badge ${dayClass}" title="${title}" onclick="openDayDetail(${idx}, ${dayIdx})">${day.day}</div>`;
             });
 
@@ -1357,8 +1379,7 @@
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px;"><span class="mem-day-badge review" style="width:20px; height:20px; font-size:9px;">ر</span> مراجعة</div>
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px;"><span class="mem-day-badge completed" style="width:20px; height:20px; font-size:9px;">✓</span> مكتمل</div>
                     <div style="display:flex; align-items:center; gap:5px; font-size:12px;"><span class="mem-day-badge current" style="width:20px; height:20px; font-size:9px;">→</span> اليوم الحالي</div>
-                </div>
-            `;
+                </div>`;
 
             document.getElementById('mem-detail-content').innerHTML = html;
         }
@@ -1366,71 +1387,63 @@
         function openDayDetail(planIdx, dayIdx) {
             let plan = memPlans[planIdx];
             let day = plan.schedule[dayIdx];
-
+            currentMemPlanId = planIdx;
+            currentMemDayIdx = dayIdx;
             document.getElementById('day-detail-title').innerText = `يوم ${day.day} - ${day.type === 'memorize' ? 'حفظ' : 'مراجعة'}`;
-            document.getElementById('day-detail-subtitle').innerText = `جزء ${day.juz} - صفحة ${day.startPage} إلى ${day.endPage}`;
+            document.getElementById('day-detail-subtitle').innerText = `${day.rangeText} | ${formatArabicPageNumber(day.ayahCount)} آية`;
 
-            // Generate pages list
-            let pagesHtml = '';
+            let pagesHtml = `
+                <div style="grid-column:1/-1; background:var(--bg-dark); border:1px dashed var(--gold); border-radius:10px; padding:12px; text-align:right; line-height:1.8;">
+                    <div style="color:var(--gold); font-weight:bold;"><i class="fas fa-route"></i> نطاق اليوم</div>
+                    <div style="font-size:13px; color:var(--text-main);">${day.rangeText}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">عدد الآيات: ${formatArabicPageNumber(day.ayahCount)} | الصفحات: ${formatArabicPageNumber(day.startPage)} - ${formatArabicPageNumber(day.endPage)}</div>
+                    ${day.reviewText ? `<div style="font-size:12px; color:var(--info); margin-top:6px;">مراجعة مرافقة: ${day.reviewText}</div>` : ''}
+                </div>`;
+
             for (let p = day.startPage; p <= day.endPage && p <= 604; p++) {
                 let juzNum = getJuzFromPage(p);
                 pagesHtml += `
                     <div class="page-item" onclick="goToPageFromPlan(${p}, ${planIdx}, ${dayIdx})">
                         <div class="page-num">${formatArabicPageNumber(p)}</div>
-                        <div class="page-juz">جزء ${juzNum}</div>
-                    </div>
-                `;
+                        <div class="page-juz">جزء ${formatArabicPageNumber(juzNum)}</div>
+                    </div>`;
             }
             document.getElementById('day-pages-list').innerHTML = pagesHtml;
 
-            // Update complete button
             let completeBtn = document.getElementById('day-complete-btn');
             if (day.completed) {
                 completeBtn.innerHTML = '<i class="fas fa-undo"></i> إلغاء الإكمال';
                 completeBtn.classList.remove('btn-success');
                 completeBtn.classList.add('btn-danger');
-                completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
             } else {
                 completeBtn.innerHTML = '<i class="fas fa-check"></i> أكملت هذا اليوم';
                 completeBtn.classList.remove('btn-danger');
                 completeBtn.classList.add('btn-success');
-                completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
             }
-
+            completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
             document.getElementById('day-detail-overlay').style.display = 'flex';
         }
 
         function getJuzFromPage(page) {
-            for (let j = 1; j <= 30; j++) {
-                if (page >= JUZ_PAGE_MAP[j].start && page <= JUZ_PAGE_MAP[j].end) {
-                    return j;
-                }
-            }
+            for (let j = 1; j <= 30; j++) if (page >= JUZ_PAGE_MAP[j].start && page <= JUZ_PAGE_MAP[j].end) return j;
             return 1;
         }
 
-        function closeDayDetail() {
-            document.getElementById('day-detail-overlay').style.display = 'none';
-        }
+        function closeDayDetail() { document.getElementById('day-detail-overlay').style.display = 'none'; }
 
         function goToPageFromPlan(page, planIdx, dayIdx) {
             closeDayDetail();
             currentPageNum = page;
             localStorage.setItem('quran_bookmark_page', page);
-
             let pageAyahs = finalPageArray[page] || [];
             if (pageAyahs.length > 0) {
                 currentSelectedSurahIdx = pageAyahs[0].surahIdx;
                 localStorage.setItem('quran_bookmark_surah_idx', currentSelectedSurahIdx);
             }
-
-            // Set active plan for reader bar
             currentMemPlanId = planIdx;
             currentMemDayIdx = dayIdx;
-
             localStorage.setItem('quran_reader_was_open', 'true');
             switchSection('quran-sec', document.getElementById('nav-btn-quran'));
-
             document.getElementById('quran-index').style.display = 'none';
             document.getElementById('search-bar-div').style.display = 'none';
             document.getElementById('quran-reader').style.display = 'block';
@@ -1441,40 +1454,32 @@
         function toggleDayComplete(planIdx, dayIdx) {
             memPlans[planIdx].schedule[dayIdx].completed = !memPlans[planIdx].schedule[dayIdx].completed;
             localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
+            let stats = getPlanCompletedStats(memPlans[planIdx], dayIdx);
+            if (memPlans[planIdx].schedule[dayIdx].completed) {
+                let msg = `أحسنت. أنهيت ${memPlans[planIdx].schedule[dayIdx].rangeText}.\nالمنجز الآن: ${stats.completedAyahs} من ${stats.totalAyahs} آية.`;
+                if (stats.completedSurahNames.length) msg += `\nالسور المكتملة: ${stats.completedSurahNames.join('، ')}.`;
+                alert(msg);
+            }
             closeDayDetail();
             openMemPlanDetail(planIdx);
             renderMemPlansList();
         }
 
         function completeDayFromDetail() {
-            if (currentMemPlanId !== null && currentMemDayIdx !== null) {
-                toggleDayComplete(currentMemPlanId, currentMemDayIdx);
-            }
+            if (currentMemPlanId !== null && currentMemDayIdx !== null) toggleDayComplete(currentMemPlanId, currentMemDayIdx);
         }
 
         function updateMemPlanReaderBar() {
             let bar = document.getElementById('mem-plan-reader-bar');
-            if (currentMemPlanId === null || currentMemDayIdx === null) {
-                bar.classList.remove('active');
-                return;
-            }
-
+            if (currentMemPlanId === null || currentMemDayIdx === null) { bar.classList.remove('active'); return; }
             let plan = memPlans[currentMemPlanId];
-            let day = plan.schedule[currentMemDayIdx];
-            if (!day) {
-                bar.classList.remove('active');
-                return;
-            }
-
+            let day = plan && plan.schedule ? plan.schedule[currentMemDayIdx] : null;
+            if (!day) { bar.classList.remove('active'); return; }
             document.getElementById('mem-reader-title').innerText = `${plan.name} - يوم ${day.day}`;
-            document.getElementById('mem-reader-pages').innerText = `صفحة ${day.startPage}-${day.endPage} (أنت في ${currentPageNum})`;
-
+            document.getElementById('mem-reader-pages').innerText = `${day.rangeText} | ${day.ayahCount} آية`;
             let progress = 0;
-            if (day.endPage > day.startPage) {
-                progress = Math.min(100, Math.round(((currentPageNum - day.startPage) / (day.endPage - day.startPage + 1)) * 100));
-            }
+            if (day.endPage >= day.startPage) progress = Math.min(100, Math.max(0, Math.round(((currentPageNum - day.startPage + 1) / (day.endPage - day.startPage + 1)) * 100)));
             document.getElementById('mem-reader-progress').style.width = progress + '%';
-
             bar.classList.add('active');
         }
 
@@ -1488,193 +1493,496 @@
         function startMemPlanReading(planIdx) {
             let plan = memPlans[planIdx];
             let currentDay = plan.schedule.find(d => !d.completed);
-            if (!currentDay) {
-                alert('مبارك! لقد أكملت هذه الخطة بنجاح! 🎉');
-                return;
-            }
-
+            if (!currentDay) { alert('مبارك! لقد أكملت هذه الخطة بنجاح! 🎉'); return; }
             let dayIdx = plan.schedule.indexOf(currentDay);
             goToPageFromPlan(currentDay.startPage, planIdx, dayIdx);
         }
 
-        function startMemExamFromReader() {
-            if (currentMemPlanId !== null && currentMemDayIdx !== null) {
-                startMemExam(currentMemPlanId, currentMemDayIdx);
+        function buildExamItemsForScope(plan, dayIdx, scope) {
+            let day = plan.schedule[dayIdx];
+            let scheduleUntilToday = plan.schedule.slice(0, dayIdx + 1);
+            let items = [];
+            if (scope === 'current-day') {
+                items = day.ayahItems || [];
+                if (!items.length) items = day.reviewItems || [];
+            } else if (scope === 'previous-day') {
+                let previousMemDay = plan.schedule.slice(0, dayIdx).reverse().find(d => (d.ayahItems || []).length);
+                items = previousMemDay ? (previousMemDay.ayahItems || []) : (day.ayahItems || []);
+            } else if (scope === 'week') {
+                items = plan.schedule.slice(Math.max(0, dayIdx - 6), dayIdx + 1).flatMap(d => d.ayahItems || []);
+            } else if (scope === 'all-to-date') {
+                items = scheduleUntilToday.flatMap(d => d.ayahItems || []);
+            } else if (scope === 'review-queue') {
+                items = (plan.reviewQueue || []).map(r => findAyahByKey(r.key)).filter(Boolean);
+            } else if (scope === 'juz') {
+                items = (plan.ayahItems || []).filter(a => a.juz === day.juz);
             }
+            let unique = [];
+            let seen = new Set();
+            items.forEach(item => {
+                if (item && item.key && !seen.has(item.key)) {
+                    seen.add(item.key);
+                    unique.push(item);
+                }
+            });
+            return unique;
+        }
+
+        function startMemExamFromReader() {
+            if (currentMemPlanId !== null && currentMemDayIdx !== null) startMemExam(currentMemPlanId, currentMemDayIdx);
         }
 
         function startMemExam(planIdx, dayIdx) {
             let plan = memPlans[planIdx];
-            let day = plan.schedule[dayIdx];
-
-            // Determine exam scope
-            let scope = 'last-juz';
-            if (plan.examFreq === 'daily') scope = 'day';
-            else if (plan.examFreq === '3days') scope = '3days';
-            else if (plan.examFreq === 'weekly') scope = 'week';
-            else if (plan.examFreq === 'juz') scope = 'juz';
-
-            let examPages = [];
-            if (scope === 'day') {
-                examPages = [day.startPage, day.endPage];
-            } else if (scope === '3days') {
-                let start = Math.max(1, dayIdx - 2);
-                examPages = [plan.schedule[start].startPage, day.endPage];
-            } else if (scope === 'week') {
-                let start = Math.max(0, dayIdx - 6);
-                examPages = [plan.schedule[start].startPage, day.endPage];
-            } else if (scope === 'juz' || scope === 'last-juz') {
-                let juzStart = JUZ_PAGE_MAP[day.juz].start;
-                let juzEnd = JUZ_PAGE_MAP[day.juz].end;
-                examPages = [juzStart, juzEnd];
-            }
-
-            document.getElementById('exam-scope-text').innerText = `اختبار: صفحة ${examPages[0]} إلى ${examPages[1]}`;
-            generateMemExamQuestions(examPages[0], examPages[1]);
+            let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
+            if (!plan || !day) return;
+            activeExamContext = { planIdx, dayIdx, examScope: 'current-day', examItems: [] };
+            showMemExamScopeSelector(planIdx, dayIdx);
             document.getElementById('exam-overlay').style.display = 'flex';
         }
 
-        function generateMemExamQuestions(startPage, endPage) {
+        function showMemExamScopeSelector(planIdx, dayIdx) {
+            let plan = memPlans[planIdx];
+            let day = plan.schedule[dayIdx];
             let contentDiv = document.getElementById('exam-content');
-            contentDiv.innerHTML = '<div class="tafsir-loading"><i class="fas fa-spinner fa-spin"></i> جاري إعداد الاختبار...</div>';
+            let options = [
+                { value: 'current-day', label: 'اليوم الحالي', desc: 'يمتحنك في آيات هذا اليوم فقط.' },
+                { value: 'previous-day', label: 'آخر يوم حفظ', desc: 'مفيد إذا كان اليوم الحالي يوم مراجعة أو امتحان.' },
+                { value: 'week', label: 'آخر أسبوع', desc: 'يشمل آخر 7 أيام حتى هذا اليوم.' },
+                { value: 'all-to-date', label: 'كل الخطة حتى اللحظة', desc: 'يشمل كل ما تم إدخاله في الخطة حتى هذا اليوم.' },
+                { value: 'review-queue', label: 'آيات تحتاج مراجعة', desc: 'يمتحنك فقط في الآيات الخطأ أو المترددة أو قيد التثبيت.' }
+            ];
+            if (plan.examFreq === 'juz') options.splice(3, 0, { value: 'juz', label: 'الجزء الحالي', desc: 'يشمل آيات الجزء المرتبط بهذا اليوم.' });
+            let defaultScope = day.type === 'review' ? 'week' : 'current-day';
+            document.getElementById('exam-scope-text').innerText = `اختبار يوم ${formatArabicPageNumber(day.day)} - اختر نطاق الامتحان`;
+            contentDiv.innerHTML = `
+                <div class="exam-question">
+                    <div style="color:var(--gold); font-size:16px; font-weight:bold; margin-bottom:8px;"><i class="fas fa-layer-group"></i> ماذا يشمل هذا الامتحان؟</div>
+                    <div style="color:var(--text-muted); font-size:12px; line-height:1.8; margin-bottom:12px;">يوم الامتحان ليس مجرد زر "اكتمل". اختر النطاق المناسب، ثم اختر عدد الأسئلة، وبعدها يبدأ التسميع.</div>
+                    <div style="display:grid; gap:8px;">
+                        ${options.map(opt => {
+                            let count = buildExamItemsForScope(plan, dayIdx, opt.value).length;
+                            let disabled = count ? '' : 'disabled';
+                            let activeStyle = opt.value === defaultScope ? 'border-color:var(--gold); box-shadow:0 0 0 1px var(--gold);' : '';
+                            return `<button class="btn" ${disabled} style="text-align:right; padding:12px; ${activeStyle}" onclick="selectMemExamScope('${opt.value}')"><strong>${opt.label}</strong> <span style="color:var(--text-muted); font-size:11px;">(${count} آية)</span><br><span style="font-size:11px; color:var(--text-muted);">${opt.desc}</span></button>`;
+                        }).join('')}
+                    </div>
+                    <button class="btn" style="width:100%; margin-top:12px; border-color:var(--text-muted); color:var(--text-muted);" onclick="closeExamModal()">إلغاء</button>
+                </div>`;
+        }
 
-            // Collect ayahs from pages
-            let examAyahs = [];
-            for (let p = startPage; p <= endPage && p <= 604; p++) {
-                let pageAyahs = finalPageArray[p] || [];
-                pageAyahs.forEach(ayah => {
-                    examAyahs.push(ayah);
-                });
-            }
+        window.selectMemExamScope = function(scope) {
+            if (!activeExamContext) return;
+            let plan = memPlans[activeExamContext.planIdx];
+            let items = buildExamItemsForScope(plan, activeExamContext.dayIdx, scope);
+            activeExamContext.examScope = scope;
+            activeExamContext.examItems = items;
+            let summary = summarizeAyahRange(items);
+            document.getElementById('exam-scope-text').innerText = `اختبار: ${summary.text}`;
+            showMemExamQuestionCountSelector(items);
+        };
 
-            if (examAyahs.length === 0) {
+        function showMemExamQuestionCountSelector(examItems) {
+            let contentDiv = document.getElementById('exam-content');
+            if (!examItems || examItems.length === 0) {
                 contentDiv.innerHTML = '<div style="text-align:center; color:var(--text-muted);">لا توجد آيات في هذا النطاق</div>';
                 return;
             }
+            let maxAllowed = Math.min(10, examItems.length);
+            let quickOptions = [1, 2, 3].filter(n => n <= maxAllowed);
+            let dropdownOptions = [];
+            for (let n = 4; n <= maxAllowed; n++) dropdownOptions.push(n);
+            contentDiv.innerHTML = `
+                <div class="exam-question">
+                    <div style="color:var(--gold); font-size:16px; font-weight:bold; margin-bottom:8px;"><i class="fas fa-list-ol"></i> كم سؤال تريد في هذا الامتحان؟</div>
+                    <div style="color:var(--text-muted); font-size:12px; line-height:1.8;">يمكن أن يكون الامتحان سؤالًا واحدًا. كل سؤال يبدأ من آية، وبعد كل تقييم ينتقل تلقائيًا للآية التالية حتى توقف هذا السؤال أو توقف الامتحان.</div>
+                    <div class="exam-question-count-grid">
+                        ${quickOptions.map(n => `<button class="btn" onclick="confirmMemExamQuestionCount(${n})">${n} ${n === 1 ? 'سؤال' : 'أسئلة'}</button>`).join('')}
+                    </div>
+                    ${dropdownOptions.length ? `
+                    <div style="margin-top:14px; display:flex; gap:8px; align-items:center;">
+                        <select id="exam-count-select" style="flex:1;">
+                            ${dropdownOptions.map(n => `<option value="${n}">${n} أسئلة</option>`).join('')}
+                        </select>
+                        <button class="btn btn-info" onclick="confirmMemExamQuestionCount(parseInt(document.getElementById('exam-count-select').value))">ابدأ</button>
+                    </div>` : ''}
+                    <button class="btn" style="width:100%; margin-top:12px; border-color:var(--text-muted); color:var(--text-muted);" onclick="showMemExamScopeSelector(${activeExamContext.planIdx}, ${activeExamContext.dayIdx})">رجوع للنطاق</button>
+                    <button class="btn" style="width:100%; margin-top:8px; border-color:var(--text-muted); color:var(--text-muted);" onclick="closeExamModal()">إلغاء</button>
+                </div>`;
+        }
 
-            // Select 5 random ayahs for exam
+        window.confirmMemExamQuestionCount = function(count) {
+            if (!activeExamContext) return;
+            activeExamContext.questionCount = count;
+            generateMemExamQuestionsFromItems(activeExamContext.examItems, count);
+        };
+
+        function generateMemExamQuestionsFromItems(examAyahs, requestedCount) {
+            let contentDiv = document.getElementById('exam-content');
+            contentDiv.innerHTML = '<div class="tafsir-loading"><i class="fas fa-spinner fa-spin"></i> جاري إعداد الاختبار...</div>';
+            if (!examAyahs || examAyahs.length === 0) {
+                contentDiv.innerHTML = '<div style="text-align:center; color:var(--text-muted);">لا توجد آيات في هذا النطاق</div>';
+                return;
+            }
+            let count = Math.max(1, Math.min(parseInt(requestedCount || 1), 10, examAyahs.length));
             let selectedAyahs = [];
             let attempts = 0;
-            while (selectedAyahs.length < 5 && attempts < 50) {
-                let idx = Math.floor(Math.random() * examAyahs.length);
-                let ayah = examAyahs[idx];
-                if (!selectedAyahs.find(a => a.key === ayah.key)) {
-                    selectedAyahs.push(ayah);
-                }
+            while (selectedAyahs.length < count && attempts < 300) {
+                let ayah = examAyahs[Math.floor(Math.random() * examAyahs.length)];
+                if (!selectedAyahs.find(a => a.key === ayah.key)) selectedAyahs.push(ayah);
                 attempts++;
             }
+            runSequentialMemExam(selectedAyahs);
+        }
 
+        function generateMemExamQuestions(startPage, endPage, requestedCount) {
+            let examAyahs = [];
+            for (let p = startPage; p <= endPage && p <= 604; p++) (finalPageArray[p] || []).forEach(ayah => examAyahs.push(ayah));
+            generateMemExamQuestionsFromItems(examAyahs, requestedCount || 1);
+        }
+
+        function setSequentialVisualStatus(result) {
+            let box = document.getElementById('seq-prompt-box');
+            let status = document.getElementById('seq-status');
+            if (!box || !status) return;
+            box.classList.remove('seq-ayah-correct', 'seq-ayah-weak', 'seq-ayah-wrong');
+            status.className = 'seq-status ' + result;
+            document.querySelectorAll('.exam-answer-area .exam-btn').forEach(b => b.classList.remove('selected'));
+            let selectedBtn = document.querySelector(`.exam-answer-area .exam-btn.${result}`);
+            if (selectedBtn) selectedBtn.classList.add('selected');
+            if (result === 'correct') {
+                box.classList.add('seq-ayah-correct');
+                status.innerHTML = '<i class="fas fa-check-circle"></i> تم تسجيل هذه الآية: صحيحة، والانتقال للآية التالية...';
+            } else if (result === 'weak') {
+                box.classList.add('seq-ayah-weak');
+                status.innerHTML = '<i class="fas fa-exclamation-circle"></i> تم تسجيل هذه الآية: متردد، وستبقى للمراجعة.';
+            } else {
+                box.classList.add('seq-ayah-wrong');
+                status.innerHTML = '<i class="fas fa-times-circle"></i> تم تسجيل هذه الآية: خطأ، وستبقى للمراجعة.';
+            }
+        }
+
+        function clearSequentialVisualStatus() {
+            let box = document.getElementById('seq-prompt-box');
+            let status = document.getElementById('seq-status');
+            if (box) box.classList.remove('seq-ayah-correct', 'seq-ayah-weak', 'seq-ayah-wrong');
+            if (status) { status.className = 'seq-status'; status.innerHTML = ''; }
+            document.querySelectorAll('.exam-answer-area .exam-btn').forEach(b => b.classList.remove('selected'));
+        }
+
+        function getNextAyahObject(ayah) {
+            if (!ayah) return null;
+            let surah = quranData[ayah.surahIdx];
+            if (!surah) return null;
+            if (ayah.ayahNum < surah.ayahs.length) {
+                let nextObj = surah.ayahs[ayah.ayahNum];
+                return { surahIdx: ayah.surahIdx, surahNum: surah.number, surahName: surah.name, ayahNum: nextObj.numberInSurah, page: nextObj.page, juz: nextObj.juz, text: nextObj.text, key: `${surah.number}_${nextObj.numberInSurah}` };
+            }
+            if (surah.number < 114) {
+                let nextSurah = quranData[ayah.surahIdx + 1];
+                if (!nextSurah || !nextSurah.ayahs[0]) return null;
+                let nextObj = nextSurah.ayahs[0];
+                return { surahIdx: ayah.surahIdx + 1, surahNum: nextSurah.number, surahName: nextSurah.name, ayahNum: nextObj.numberInSurah, page: nextObj.page, juz: nextObj.juz, text: nextObj.text, key: `${nextSurah.number}_${nextObj.numberInSurah}` };
+            }
+            return null;
+        }
+
+        function getPreviousAyahObject(ayah) {
+            if (!ayah) return null;
+            let surah = quranData[ayah.surahIdx];
+            if (!surah) return null;
+            if (ayah.ayahNum > 1) {
+                let prevObj = surah.ayahs[ayah.ayahNum - 2];
+                return { surahIdx: ayah.surahIdx, surahNum: surah.number, surahName: surah.name, ayahNum: prevObj.numberInSurah, page: prevObj.page, juz: prevObj.juz, text: prevObj.text, key: `${surah.number}_${prevObj.numberInSurah}` };
+            }
+            return ayah;
+        }
+
+        function runSequentialMemExam(selectedAyahs) {
+            let contentDiv = document.getElementById('exam-content');
             let currentQ = 0;
-            let results = [];
+            let resultsByKey = {};
+            let currentAyah = null;
+            let autoTimer = null;
 
-            function showQuestion() {
-                if (currentQ >= selectedAyahs.length) {
-                    showExamResults(results);
+            function renderCurrentAyah() {
+                if (!currentAyah) {
+                    currentQ++;
+                    showQuestionStart();
                     return;
                 }
-
-                let ayah = selectedAyahs[currentQ];
-                let surah = quranData[ayah.surahIdx];
-                let nextAyah = null;
-
-                if (ayah.ayahNum < surah.ayahs.length) {
-                    nextAyah = surah.ayahs[ayah.ayahNum]; // numberInSurah is 1-based, array is 0-based
-                }
-
-                let html = `
+                let surah = quranData[currentAyah.surahIdx];
+                contentDiv.innerHTML = `
                     <div class="exam-question">
-                        <div style="color:var(--gold); font-size:13px; margin-bottom:10px;">
-                            سؤال ${currentQ + 1} من ${selectedAyahs.length} - ${formatSurahHeaderName(surah.name)} (آية ${ayah.ayahNum})
+                        <div style="color:var(--gold); font-size:13px; margin-bottom:10px;">سؤال ${currentQ + 1} من ${selectedAyahs.length} - ${formatSurahHeaderName(surah.name)} (آية ${currentAyah.ayahNum})</div>
+                        <div style="color:var(--text-muted); font-size:12px; margin-bottom:8px; line-height:1.8;">اقرأ من قوله تعالى، ثم قيّم أداءك أو أداء من تمتحنه. بعد اختيار النتيجة سينتقل البرنامج تلقائيًا للآية التالية.</div>
+                        <div id="seq-prompt-box" class="exam-ayah" data-key="${currentAyah.key}">
+                            <div style="color:var(--gold); font-size:12px; font-family:'Cairo'; margin-bottom:6px;">اقرأ من قوله تعالى:</div>
+                            ${currentAyah.text}
                         </div>
-                        <div class="exam-ayah">${ayah.text}</div>
-                        <div style="color:var(--text-muted); font-size:12px; margin:10px 0;">ما الآية التي تليها؟</div>
-                        ${nextAyah ? `
-                        <div id="answer-reveal" style="display:none; background:var(--bg-dark); border:1px dashed var(--gold); border-radius:8px; padding:15px; margin:10px 0; font-family:'Amiri',serif; font-size:18px; line-height:1.8; text-align:center;">
-                            ${nextAyah.text}
+                        <div id="seq-status" class="seq-status"></div>
+                        <div id="seq-rating-area" class="exam-answer-area" style="display:flex;">
+                            <button class="exam-btn correct" onclick="recordSequentialAyah('correct')"><i class="fas fa-check-circle"></i> صحيحة</button>
+                            <button class="exam-btn weak" onclick="recordSequentialAyah('weak')"><i class="fas fa-exclamation-circle"></i> متردد</button>
+                            <button class="exam-btn wrong" onclick="recordSequentialAyah('wrong')"><i class="fas fa-times-circle"></i> خطأ</button>
                         </div>
-                        <div class="exam-answer-area">
-                            <button class="exam-btn correct" onclick="recordAnswer('correct')">
-                                <i class="fas fa-check-circle"></i> حفظتها بثبات
-                            </button>
-                            <button class="exam-btn weak" onclick="recordAnswer('weak')">
-                                <i class="fas fa-exclamation-circle"></i> حفظتها لكن متردد
-                            </button>
-                            <button class="exam-btn wrong" onclick="recordAnswer('wrong')">
-                                <i class="fas fa-times-circle"></i> لم أحفظها
-                            </button>
-                        </div>
-                        <button class="btn" style="width:100%; margin-top:10px; border-color:var(--info); color:var(--info);" onclick="document.getElementById('answer-reveal').style.display='block'; this.style.display='none';">
-                            <i class="fas fa-eye"></i> اكشف الآية التالية
-                        </button>
-                        ` : `
-                        <div style="text-align:center; color:var(--text-muted); padding:15px;">آية خاتمة السورة</div>
-                        <div class="exam-answer-area">
-                            <button class="exam-btn correct" onclick="recordAnswer('correct')">
-                                <i class="fas fa-check-circle"></i> أحفظ الخاتمة
-                            </button>
-                            <button class="exam-btn wrong" onclick="recordAnswer('wrong')">
-                                <i class="fas fa-times-circle"></i> لم أحفظها
-                            </button>
-                        </div>
-                        `}
-                    </div>
-                `;
-                contentDiv.innerHTML = html;
+                        <button class="btn btn-info" style="width:100%; margin-top:10px;" onclick="stopSequentialQuestion()"><i class="fas fa-forward"></i> أوقف هذا السؤال وانتقل للسؤال التالي</button>
+                        <button class="btn btn-danger" style="width:100%; margin-top:10px;" onclick="finishSequentialExamNow()"><i class="fas fa-stop-circle"></i> إيقاف الامتحان الآن</button>
+                    </div>`;
+                if (resultsByKey[currentAyah.key]) setSequentialVisualStatus(resultsByKey[currentAyah.key].result);
             }
 
-            window.recordAnswer = function(result) {
-                results.push(result);
-                currentQ++;
-                showQuestion();
+            function showQuestionStart() {
+                if (autoTimer) clearTimeout(autoTimer);
+                if (currentQ >= selectedAyahs.length) { showExamResults(Object.values(resultsByKey)); return; }
+                currentAyah = selectedAyahs[currentQ];
+                renderCurrentAyah();
+            }
+
+            window.recordSequentialAyah = function(result) {
+                if (!currentAyah) return;
+                let recordedAyah = currentAyah;
+                resultsByKey[recordedAyah.key] = { result, key: recordedAyah.key, ayah: recordedAyah };
+                setSequentialVisualStatus(result);
+                document.querySelectorAll('.exam-answer-area .exam-btn').forEach(b => b.disabled = true);
+                autoTimer = setTimeout(() => {
+                    currentAyah = getNextAyahObject(recordedAyah);
+                    if (!currentAyah) {
+                        currentQ++;
+                        showQuestionStart();
+                    } else {
+                        renderCurrentAyah();
+                    }
+                }, 550);
             };
 
-            showQuestion();
+            window.stopSequentialQuestion = function() {
+                if (autoTimer) clearTimeout(autoTimer);
+                currentQ++;
+                showQuestionStart();
+            };
+
+            window.finishSequentialExamNow = function() {
+                if (autoTimer) clearTimeout(autoTimer);
+                showExamResults(Object.values(resultsByKey));
+            };
+
+            showQuestionStart();
+        }
+
+        function updateExamReviewQueue(results) {
+            if (!activeExamContext || activeExamContext.planIdx === undefined) return;
+            let plan = memPlans[activeExamContext.planIdx];
+            if (!plan) return;
+            if (!Array.isArray(plan.reviewQueue)) plan.reviewQueue = [];
+            results.forEach(item => {
+                if (!item || !item.key) return;
+                let existingIdx = plan.reviewQueue.findIndex(r => r.key === item.key);
+                let existing = existingIdx >= 0 ? plan.reviewQueue[existingIdx] : null;
+                if (item.result === 'correct') {
+                    if (existingIdx >= 0) {
+                        if (existing && existing.result === 'reviewing') plan.reviewQueue.splice(existingIdx, 1);
+                        else plan.reviewQueue[existingIdx] = { ...existing, result: 'reviewing', lastCorrectAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+                    }
+                    return;
+                }
+                let ayah = item.ayah || findAyahByKey(item.key);
+                let reviewItem = {
+                    key: item.key,
+                    result: item.result,
+                    surahIdx: ayah ? ayah.surahIdx : null,
+                    surahNum: ayah ? ayah.surahNum : null,
+                    surahName: ayah ? ayah.surahName : '',
+                    ayahNum: ayah ? ayah.ayahNum : null,
+                    page: ayah ? ayah.page : null,
+                    juz: ayah ? ayah.juz : null,
+                    text: ayah ? ayah.text : '',
+                    dayIdx: activeExamContext.dayIdx,
+                    attempts: existing && existing.attempts ? existing.attempts + 1 : 1,
+                    updatedAt: new Date().toISOString()
+                };
+                if (existingIdx >= 0) plan.reviewQueue[existingIdx] = reviewItem;
+                else plan.reviewQueue.push(reviewItem);
+            });
+            localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
+            renderMemPlansList();
         }
 
         function showExamResults(results) {
             let contentDiv = document.getElementById('exam-content');
-            let correct = results.filter(r => r === 'correct').length;
-            let weak = results.filter(r => r === 'weak').length;
-            let wrong = results.filter(r => r === 'wrong').length;
-            let total = results.length;
-
+            results = Array.isArray(results) ? results : [];
+            updateExamReviewQueue(results);
+            let flat = results.map(r => typeof r === 'string' ? r : r.result);
+            let correct = flat.filter(r => r === 'correct').length;
+            let weak = flat.filter(r => r === 'weak').length;
+            let wrong = flat.filter(r => r === 'wrong').length;
+            let total = flat.length || 1;
             let percentage = Math.round((correct / total) * 100);
             let resultClass = percentage >= 80 ? 'good' : percentage >= 50 ? 'medium' : 'bad';
-            let resultText = percentage >= 80 ? 'ممتاز! حفظك قوي ومتمكن 🌟' : 
-                            percentage >= 50 ? 'جيد، لكن يحتاج مراجعة أكثر 📖' : 
-                            'يحتاج مراجعة مكثفة لهذه الصفحات ⚠️';
-
-            let html = `
+            let resultText = percentage >= 80 ? 'ممتاز! حفظك قوي ومتمكن 🌟' : percentage >= 50 ? 'جيد، لكن يحتاج مراجعة أكثر 📖' : 'يحتاج مراجعة مكثفة لهذه الآيات ⚠️';
+            let reviewItems = results.filter(r => r && (r.result === 'weak' || r.result === 'wrong'));
+            let reviewHtml = reviewItems.length ? `
+                <div class="review-ayah-list">
+                    <div style="color:var(--gold); font-weight:bold; margin-bottom:3px;"><i class="fas fa-book-reader"></i> آيات تحتاج مراجعة</div>
+                    ${reviewItems.map(r => {
+                        let a = r.ayah || findAyahByKey(r.key);
+                        let label = r.result === 'wrong' ? 'خطأ' : 'متردد';
+                        let color = r.result === 'wrong' ? 'var(--danger)' : 'var(--warning)';
+                        return `<div class="review-ayah-item" onclick="goToReviewAyahFromExam('${r.key}')"><div style="color:${color}; font-weight:bold;">${label} - ${a ? formatSurahHeaderName(a.surahName) + ' آية ' + a.ayahNum : r.key}</div><div style="color:var(--text-muted); margin-top:4px; font-family:'Amiri',serif;">${a ? a.text.substring(0, 90) : ''}${a && a.text.length > 90 ? '...' : ''}</div></div>`;
+                    }).join('')}
+                </div>` : '';
+            contentDiv.innerHTML = `
                 <div style="text-align:center; padding:20px;">
-                    <div style="font-size:48px; margin-bottom:10px;">
-                        ${percentage >= 80 ? '🏆' : percentage >= 50 ? '📜' : '⚠️'}
+                    <div style="font-size:48px; margin-bottom:10px;">${percentage >= 80 ? '🏆' : percentage >= 50 ? '📜' : '⚠️'}</div>
+                    <div class="exam-result ${resultClass}"><div style="font-size:24px; font-weight:bold; margin-bottom:5px;">${correct}/${total} صحيحة (${percentage}%)</div><div>${resultText}</div></div>
+                    <div style="margin-top:15px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <div style="background:rgba(34,197,94,0.1); padding:8px 15px; border-radius:8px; color:var(--success);"><i class="fas fa-check"></i> ${correct} صحيحة</div>
+                        <div style="background:rgba(245,158,11,0.1); padding:8px 15px; border-radius:8px; color:var(--warning);"><i class="fas fa-exclamation"></i> ${weak} متردد</div>
+                        <div style="background:rgba(239,68,68,0.1); padding:8px 15px; border-radius:8px; color:var(--danger);"><i class="fas fa-times"></i> ${wrong} خطأ</div>
                     </div>
-                    <div class="exam-result ${resultClass}">
-                        <div style="font-size:24px; font-weight:bold; margin-bottom:5px;">${correct}/${total} صحيحة (${percentage}%)</div>
-                        <div>${resultText}</div>
-                    </div>
-                    <div style="margin-top:15px; display:flex; gap:10px; justify-content:center;">
-                        <div style="background:rgba(34,197,94,0.1); padding:8px 15px; border-radius:8px; color:var(--success);">
-                            <i class="fas fa-check"></i> ${correct} بثبات
-                        </div>
-                        <div style="background:rgba(245,158,11,0.1); padding:8px 15px; border-radius:8px; color:var(--warning);">
-                            <i class="fas fa-exclamation"></i> ${weak} متردد
-                        </div>
-                        <div style="background:rgba(239,68,68,0.1); padding:8px 15px; border-radius:8px; color:var(--danger);">
-                            <i class="fas fa-times"></i> ${wrong} لم تحفظ
-                        </div>
-                    </div>
-                    <button class="btn" style="margin-top:20px; width:100%;" onclick="closeExamModal()">
-                        <i class="fas fa-check"></i> تمام، سأراجع وأكمل
-                    </button>
-                </div>
-            `;
-            contentDiv.innerHTML = html;
+                    ${reviewHtml}
+                    <button class="btn" style="margin-top:20px; width:100%;" onclick="closeExamModal()"><i class="fas fa-check"></i> تمام، سأراجع وأكمل</button>
+                </div>`;
         }
 
-        function closeExamModal() {
-            document.getElementById('exam-overlay').style.display = 'none';
+        function findAyahByKey(key) {
+            if (!key) return null;
+            let parts = key.split('_');
+            let surahNum = parseInt(parts[0]);
+            let ayahNum = parseInt(parts[1]);
+            let surah = quranData[surahNum - 1];
+            if (!surah || !surah.ayahs || !surah.ayahs[ayahNum - 1]) return null;
+            let ay = surah.ayahs[ayahNum - 1];
+            return {
+                surahIdx: surahNum - 1,
+                surahNum: surah.number,
+                surahName: surah.name,
+                ayahNum: ay.numberInSurah,
+                page: ay.page,
+                juz: ay.juz,
+                text: ay.text,
+                key: `${surah.number}_${ay.numberInSurah}`
+            };
         }
+
+        function getAyahReviewStatus(key) {
+            let strongest = '';
+            memPlans.forEach(plan => {
+                (plan.reviewQueue || []).forEach(item => {
+                    if (item.key === key) {
+                        if (item.result === 'wrong') strongest = 'wrong';
+                        else if (item.result === 'weak' && strongest !== 'wrong') strongest = 'weak';
+                        else if (item.result === 'reviewing' && !strongest) strongest = 'reviewing';
+                    }
+                });
+            });
+            return strongest;
+        }
+
+        function openPlanReviewQueue(planIdx) {
+            currentMemPlanId = planIdx;
+            let plan = memPlans[planIdx];
+            if (!plan) return;
+            let queue = plan.reviewQueue || [];
+            let counts = {
+                wrong: queue.filter(i => i.result === 'wrong').length,
+                weak: queue.filter(i => i.result === 'weak').length,
+                reviewing: queue.filter(i => i.result === 'reviewing').length
+            };
+            let html = `
+                <div style="background:var(--bg-card); border:1px solid var(--gold); border-radius:12px; padding:18px; margin-bottom:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div>
+                            <h3 style="color:var(--gold); margin-bottom:6px;"><i class="fas fa-notes-medical"></i> آيات تحتاج مراجعة</h3>
+                            <div style="font-size:12px; color:var(--text-muted); line-height:1.8;">الخطأ والمتردد يبقيان هنا. إذا أجبت الآية صحيحة تصبح قيد التثبيت، وإذا نجحت مرة أخرى تُحذف من القائمة.</div>
+                        </div>
+                        <button class="btn" onclick="openMemPlanDetail(${planIdx})"><i class="fas fa-arrow-right"></i> عودة للخطة</button>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; font-size:12px;">
+                        <span style="color:var(--danger); border:1px solid var(--danger); padding:6px 10px; border-radius:20px;">خطأ: ${counts.wrong}</span>
+                        <span style="color:var(--warning); border:1px solid var(--warning); padding:6px 10px; border-radius:20px;">متردد: ${counts.weak}</span>
+                        <span style="color:var(--info); border:1px solid var(--info); padding:6px 10px; border-radius:20px;">قيد التثبيت: ${counts.reviewing}</span>
+                    </div>
+                </div>`;
+            if (!queue.length) {
+                html += `<div class="mem-plan-card" style="text-align:center;"><i class="fas fa-check-circle" style="font-size:36px; color:var(--success); margin-bottom:10px;"></i><h3 style="color:var(--text-main);">لا توجد آيات ضعيفة حالياً</h3><p style="color:var(--text-muted); font-size:13px;">كل الآيات المسجلة في هذه الخطة مستقرة حتى الآن.</p></div>`;
+            } else {
+                html += `<div class="review-ayah-list">`;
+                queue.forEach(item => {
+                    let label = item.result === 'wrong' ? 'خطأ' : (item.result === 'weak' ? 'متردد' : 'قيد التثبيت');
+                    let color = item.result === 'wrong' ? 'var(--danger)' : (item.result === 'weak' ? 'var(--warning)' : 'var(--info)');
+                    html += `
+                        <div class="review-ayah-item" style="border-color:${color};">
+                            <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+                                <div>
+                                    <div style="color:${color}; font-weight:bold;">${label} - ${formatSurahHeaderName(item.surahName)} آية ${formatArabicPageNumber(item.ayahNum || '')}</div>
+                                    <div style="color:var(--text-muted); margin-top:4px; font-family:'Amiri',serif; line-height:1.8;">${item.text || ''}</div>
+                                </div>
+                            </div>
+                            <div class="review-action-row">
+                                <button class="btn" onclick="goToReviewAyahFromExam('${item.key}')"><i class="fas fa-book-open"></i> افتح الآية</button>
+                                <button class="btn btn-info" onclick="startSingleReviewAyahExam(${planIdx}, '${item.key}')"><i class="fas fa-clipboard-check"></i> امتحنها</button>
+                                <button class="btn btn-success" onclick="markReviewAyahTemporary(${planIdx}, '${item.key}')"><i class="fas fa-check"></i> تمكنت مؤقتاً</button>
+                                <button class="btn btn-danger" onclick="removeReviewAyah(${planIdx}, '${item.key}')"><i class="fas fa-trash"></i> إزالة</button>
+                            </div>
+                        </div>`;
+                });
+                html += `</div>`;
+            }
+            document.getElementById('mem-detail-content').innerHTML = html;
+        }
+
+        function markReviewAyahTemporary(planIdx, key) {
+            let plan = memPlans[planIdx];
+            if (!plan || !Array.isArray(plan.reviewQueue)) return;
+            let item = plan.reviewQueue.find(i => i.key === key);
+            if (!item) return;
+            item.result = 'reviewing';
+            item.updatedAt = new Date().toISOString();
+            localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
+            openPlanReviewQueue(planIdx);
+            renderMushafText();
+        }
+
+        function removeReviewAyah(planIdx, key) {
+            let plan = memPlans[planIdx];
+            if (!plan || !Array.isArray(plan.reviewQueue)) return;
+            plan.reviewQueue = plan.reviewQueue.filter(i => i.key !== key);
+            localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
+            openPlanReviewQueue(planIdx);
+            renderMushafText();
+        }
+
+        function startSingleReviewAyahExam(planIdx, key) {
+            let target = findAyahByKey(key);
+            if (!target) return;
+            let prompt = getPreviousAyahObject(target) || target;
+            activeExamContext = { planIdx, dayIdx: null, examItems: [prompt], reviewMode: true, targetKey: key, questionCount: 1 };
+            document.getElementById('exam-scope-text').innerText = `مراجعة آية: ${formatSurahHeaderName(target.surahName)} آية ${target.ayahNum}`;
+            runSequentialMemExam([prompt]);
+            document.getElementById('exam-overlay').style.display = 'flex';
+        }
+
+        function goToReviewAyahFromExam(key) {
+            let ayah = findAyahByKey(key);
+            if (!ayah) return;
+            closeExamModal();
+            currentPageNum = ayah.page || 1;
+            currentSelectedSurahIdx = ayah.surahIdx;
+            localStorage.setItem('quran_bookmark_page', currentPageNum);
+            localStorage.setItem('quran_bookmark_surah_idx', currentSelectedSurahIdx);
+            switchSection('quran-sec', document.getElementById('nav-btn-quran'));
+            document.getElementById('quran-index').style.display = 'none';
+            document.getElementById('search-bar-div').style.display = 'none';
+            document.getElementById('quran-reader').style.display = 'block';
+            renderMushafText();
+            setTimeout(() => {
+                let el = document.querySelector(`.ayah-span[data-key="${key}"]`);
+                if (el) { el.classList.add('focused-active'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            }, 100);
+        }
+
+        function closeExamModal() { document.getElementById('exam-overlay').style.display = 'none'; }
 
         function backToMemDashboard() {
             document.getElementById('mem-plan-detail').style.display = 'none';
@@ -2366,7 +2674,8 @@
                         }
                     }
 
-                    let noteClass = ayahNotesStorage[ayah.key] ? 'has-note' : '';
+                    let reviewStatus = getAyahReviewStatus(ayah.key);
+                    let noteClass = (ayahNotesStorage[ayah.key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
                     let ayahText = ayah.text;
                     if (activeFont === 'standard') {
                         ayahText = normalizeArabicText(ayahText);
@@ -2407,7 +2716,8 @@
                 surah.ayahs.forEach((ayah, idx) => {
                     let ayahNum = idx + 1;
                     let key = `${surah.number}_${ayahNum}`;
-                    let noteClass = ayahNotesStorage[key] ? 'has-note' : '';
+                    let reviewStatus = getAyahReviewStatus(key);
+                    let noteClass = (ayahNotesStorage[key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
                     let ayahText = ayah.text;
                     if (activeFont === 'standard') {
                         ayahText = normalizeArabicText(ayahText);
