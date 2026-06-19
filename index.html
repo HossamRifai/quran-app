@@ -165,6 +165,7 @@
             background-size: 100% 100%; background-repeat: no-repeat; position: relative;
         }
         .surah-header-title { font-family: 'Amiri', serif; font-size: 25px; font-weight: bold; color: var(--gold); text-shadow: 0 0 4px rgba(0,0,0,0.4); }
+        .basmalah-separator { text-align: center; font-family: 'Amiri', 'Lateef', serif; font-size: 24px; line-height: 2; color: var(--gold); margin: 14px 0 18px 0; letter-spacing: 0.3px; }
 
         .ayah-end-ornament {
             display: inline-block; position: relative; width: 36px; height: 36px; margin: 0 5px; vertical-align: middle;
@@ -211,6 +212,25 @@
         .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; gap: 15px; }
         .settings-row h3 { font-size: 15px; font-weight: 700; color: var(--text-main); }
         .settings-row p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+
+        /* Settings Choice Cards */
+        .setting-choice-group { width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+        .setting-choice { position: relative; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-dark); color: var(--text-main); cursor: pointer; transition: 0.2s; font-size: 13px; font-weight: bold; }
+        .setting-choice input { accent-color: var(--gold); }
+        .setting-choice:hover, .setting-choice:has(input:checked) { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(212,175,55,0.12); }
+        .setting-choice:has(input:checked) { background: rgba(212,175,55,0.09); color: var(--gold); }
+        .settings-hidden-control { display: none !important; }
+        .reciter-choice-group { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+        .theme-choice-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; width: 100%; max-width: 620px; }
+        .theme-choice { min-height: 48px; border-radius: 12px; border: 2px solid transparent; padding: 10px; display: flex; align-items: center; justify-content: center; text-align: center; cursor: pointer; font-size: 12px; font-weight: 900; box-shadow: 0 4px 12px rgba(0,0,0,0.18); transition: 0.2s; }
+        .theme-choice input { display: none; }
+        .theme-choice:has(input:checked) { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 0 0 3px rgba(212,175,55,0.18), 0 8px 18px rgba(0,0,0,0.25); }
+        .theme-default { background:#0f172a; color:#d4af37; }
+        .theme-olive-card { background:#182e20; color:#e2b659; }
+        .theme-turquoise-card { background:#0b2d38; color:#40e0d0; }
+        .theme-dark-card { background:#141414; color:#e5e5e5; }
+        .theme-hijazi-card { background:#fffbf4; color:#b38f2d; }
 
         .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo', sans-serif; font-weight: bold; transition: 0.2s; }
         .btn:hover { background: var(--gold); color: #000; }
@@ -600,10 +620,14 @@
                     <h3>آلية التحكم الافتراضية عند النقر</h3>
                     <p>طريقة التفاعل المباشرة عند ضغط الآيات الكريمة</p>
                 </div>
-                <select style="width:240px;" id="click-action-select" onchange="setClickAction(this.value)">
+                <select class="settings-hidden-control" id="click-action-select" onchange="setClickAction(this.value)">
                     <option value="focus">تلاوة الآية الحالية (والتوقف بعدها)</option>
                     <option value="audio">التلاوة المسترسلة (التلقائية دون توقف)</option>
                 </select>
+                <div class="setting-choice-group">
+                    <label class="setting-choice"><input type="radio" name="click-action-radio" value="focus" onchange="setClickAction(this.value)"> تلاوة آية واحدة</label>
+                    <label class="setting-choice"><input type="radio" name="click-action-radio" value="audio" onchange="setClickAction(this.value)"> تلاوة مسترسلة</label>
+                </div>
             </div>
 
             <div class="settings-row">
@@ -611,10 +635,14 @@
                     <h3>نمط تصفح وعرض المصحف</h3>
                     <p>طريقة هندسة وترتيب الآيات والسور المباركة</p>
                 </div>
-                <select style="width:240px;" id="display-mode-select" onchange="setDisplayMode(this.value)">
+                <select class="settings-hidden-control" id="display-mode-select" onchange="setDisplayMode(this.value)">
                     <option value="pages">صفحات المصحف الكاملة الموثقة (604 صفحة)</option>
                     <option value="continuous">عرض مسترسل (سورة بسورة بالخط الموضح)</option>
                 </select>
+                <div class="setting-choice-group">
+                    <label class="setting-choice"><input type="radio" name="display-mode-radio" value="pages" onchange="setDisplayMode(this.value)"> صفحات المصحف</label>
+                    <label class="setting-choice"><input type="radio" name="display-mode-radio" value="continuous" onchange="setDisplayMode(this.value)"> عرض مسترسل</label>
+                </div>
             </div>
 
             <div class="settings-row">
@@ -622,30 +650,41 @@
                     <h3>نوع ومظهر الخط المعتمد</h3>
                     <p>التبديل بين الرسم العثماني للمصحف الشريف أو الخط الإملائي القياسي</p>
                 </div>
-                <select style="width:240px;" id="font-view-select" onchange="changeFontView(this.value)">
+                <select class="settings-hidden-control" id="font-view-select" onchange="changeFontView(this.value)">
                     <option value="uthmani">الرسم العثماني الموثق (مصحف المدينة)</option>
                     <option value="standard">الخط الإملائي القياسي (خط المتون الموضح)</option>
                 </select>
+                <div class="setting-choice-group">
+                    <label class="setting-choice"><input type="radio" name="font-view-radio" value="uthmani" onchange="changeFontView(this.value)"> الرسم العثماني</label>
+                    <label class="setting-choice"><input type="radio" name="font-view-radio" value="standard" onchange="changeFontView(this.value)"> الخط القياسي</label>
+                </div>
             </div>
 
             <div class="settings-row">
                 <div>
                     <h3>القارئ المعتمد للمنصة</h3>
-                    <p>قائمة كبار المقرئين المصححة بالكامل سحابياً</p>
+                    <p>اختر القارئ بصيغة أوضح من القائمة التقليدية</p>
                 </div>
-                <select style="width:240px;" id="reciter-select" onchange="changeReciter(this.value)">
+                <select class="settings-hidden-control" id="reciter-select" onchange="changeReciter(this.value)">
                     <option value="ar.alafasy">الشيخ مشاري بن راشد العفاسي</option>
                     <option value="ar.mahermuaiqly">الشيخ ماهر المعيقلي</option>
                     <option value="ar.abdulsamad">الشيخ عبد الباسط عبد الصمد</option>
                     <option value="ar.husary">الشيخ محمود خليل الحصري</option>
                     <option value="ar.minshawi">الشيخ محمد صديق المنشاوي</option>
                 </select>
+                <div class="setting-choice-group reciter-choice-group">
+                    <label class="setting-choice"><input type="radio" name="reciter-radio" value="ar.alafasy" onchange="changeReciter(this.value)"> مشاري العفاسي</label>
+                    <label class="setting-choice"><input type="radio" name="reciter-radio" value="ar.mahermuaiqly" onchange="changeReciter(this.value)"> ماهر المعيقلي</label>
+                    <label class="setting-choice"><input type="radio" name="reciter-radio" value="ar.abdulsamad" onchange="changeReciter(this.value)"> عبد الباسط</label>
+                    <label class="setting-choice"><input type="radio" name="reciter-radio" value="ar.husary" onchange="changeReciter(this.value)"> الحصري</label>
+                    <label class="setting-choice"><input type="radio" name="reciter-radio" value="ar.minshawi" onchange="changeReciter(this.value)"> المنشاوي</label>
+                </div>
             </div>
 
-            <div class="settings-row">
+            <div class="settings-row" id="tafsir-settings-row" style="display:none;">
                 <div>
                     <h3>التفاسير المعتمدة للعرض</h3>
-                    <p>اختر التفاسير التي تريد عرضها فوق الآيات (يمكنك اختيار أكثر من واحد)</p>
+                    <p>مخفية حاليًا من الإعدادات، والكود محفوظ دون حذف.</p>
                 </div>
                 <div style="width:240px;">
                     <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; font-size:13px;">
@@ -680,24 +719,35 @@
                     <h3>نوع شاشة العرض والتهيئة</h3>
                     <p>تعديل توزيع هوامش المصحف حسب مواصفات جهازك الحالي</p>
                 </div>
-                <select style="width:240px;" id="device-view-select" onchange="changeDeviceView(this.value)">
+                <select class="settings-hidden-control" id="device-view-select" onchange="changeDeviceView(this.value)">
                     <option value="mobile">شاشة هاتف محمول (مؤشرات مدمجة ومريحة)</option>
                     <option value="laptop">شاشة حاسوب / لابتوب (توسيط وعزل الهوامش)</option>
                 </select>
+                <div class="setting-choice-group">
+                    <label class="setting-choice"><input type="radio" name="device-view-radio" value="mobile" onchange="changeDeviceView(this.value)"> هاتف محمول</label>
+                    <label class="setting-choice"><input type="radio" name="device-view-radio" value="laptop" onchange="changeDeviceView(this.value)"> حاسوب / لابتوب</label>
+                </div>
             </div>
 
             <div class="settings-row">
                 <div>
                     <h3>بيئة القراءة والألوان (السمت البصري)</h3>
-                    <p>تعديل فوري وشامل لجميع عناصر الواجهة لتوفير الراحة البصرية</p>
+                    <p>كل خيار يظهر بلونه، واختر بيئة قراءة واحدة</p>
                 </div>
-                <select style="width:240px;" id="theme-select" onchange="changeTheme(this.value)">
+                <select class="settings-hidden-control" id="theme-select" onchange="changeTheme(this.value)">
                     <option value="default">السمت الداكن العميق (افتراضي موقر)</option>
                     <option value="olive">المظهر الزمردي الراسخ</option>
                     <option value="turquoise">الفيروزي المضيء المبهج</option>
                     <option value="dark">الليل الحالك (أقصى عتمة مريحة)</option>
                     <option value="hijazi">السمت الحجازي المضيء</option>
                 </select>
+                <div class="theme-choice-group">
+                    <label class="theme-choice theme-default"><input type="radio" name="theme-radio" value="default" onchange="changeTheme(this.value)"> الداكن العميق</label>
+                    <label class="theme-choice theme-olive-card"><input type="radio" name="theme-radio" value="olive" onchange="changeTheme(this.value)"> الزمردي الراسخ</label>
+                    <label class="theme-choice theme-turquoise-card"><input type="radio" name="theme-radio" value="turquoise" onchange="changeTheme(this.value)"> الفيروزي</label>
+                    <label class="theme-choice theme-dark-card"><input type="radio" name="theme-radio" value="dark" onchange="changeTheme(this.value)"> الليل الحالك</label>
+                    <label class="theme-choice theme-hijazi-card"><input type="radio" name="theme-radio" value="hijazi" onchange="changeTheme(this.value)"> الحجازي المضيء</label>
+                </div>
             </div>
 
             <div class="settings-row" style="border-color: var(--gold); background: rgba(212,175,55,0.02); justify-content: center; padding: 20px;">
@@ -714,7 +764,7 @@
             <hr style="border:none; border-top:1px dashed var(--border); margin:15px 0;">
             <textarea id="note-modal-textarea" rows="4" placeholder="دَوّن هنا روابط المتشابهات أو الملاحظات التدبرية للآية..." style="width:100%; background:var(--bg-dark); color:var(--text-main); border:1px solid var(--border); border-radius:8px; padding:10px; font-family:'Cairo'; outline:none; resize:none; margin-bottom:15px; text-align:right; font-size:13px;"></textarea>
             <div style="display:flex; justify-content:end; gap:10px; flex-wrap:wrap;">
-                <button class="btn" style="border-color:var(--info); color:var(--info);" onclick="openTafsirFromModal()"><i class="fas fa-book"></i> التفسير</button>
+                <button class="btn" id="note-tafsir-btn" style="display:none; border-color:var(--info); color:var(--info);" onclick="openTafsirFromModal()"><i class="fas fa-book"></i> التفسير</button>
                 <button class="btn" style="border-color:var(--text-muted); color:var(--text-muted);" onclick="closeNoteModal()">إغلاق</button>
                 <button class="btn" style="background:var(--gold); border-color:var(--gold); color:#000;" onclick="saveAyahNote()">حفظ التدوين 💾</button>
             </div>
@@ -862,12 +912,61 @@
                 .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/[ىيۦ]/g, "ي").replace(/^ال/g, "").trim();
         }
 
+        const BASMALAH_DISPLAY_TEXT = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+
+        function stripArabicMarksForBasmalah(str) {
+            if (!str) return "";
+            return str
+                .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+                .replace(/[إأآٱ]/g, "ا")
+                .replace(/ة/g, "ه")
+                .replace(/ى/g, "ي")
+                .replace(/\s+/g, "")
+                .trim();
+        }
+
+        function shouldShowBasmalahForSurah(surahNumber) {
+            return surahNumber !== 9;
+        }
+
+        function renderBasmalahSeparator(surahNumber) {
+            return shouldShowBasmalahForSurah(surahNumber)
+                ? `<div class="basmalah-separator">${BASMALAH_DISPLAY_TEXT}</div>`
+                : '';
+        }
+
         function removeUthmaniBasmalah(text, surahNumber) {
             if (!text) return "";
             let cleaned = text.trim();
-            if (surahNumber === 1 || surahNumber === 9) return cleaned;
-            let basmalahRegex = /^بِسْمِ[\s\u0640-]*الل[\s\u0640-]*ه[\s\u0640-]*الر[\s\u0640-]*ح[\s\u0640-]*م[\s\u0640-]*[ٰ\u0640-]*ن[\s\u0640-]*الر[\s\u0640-]*ح[\s\u0640-]*ي[\s\u0640-]*م[\s\u0640-]*[\u064B-\u065F]*/g;
-            return cleaned.replace(basmalahRegex, "").trim();
+            if (surahNumber === 9) return cleaned;
+
+            let words = cleaned.split(/\s+/);
+            if (words.length >= 4) {
+                let firstFour = stripArabicMarksForBasmalah(words.slice(0, 4).join(' '));
+                if (firstFour === 'بسماللهالرحمنالرحيم') {
+                    return words.slice(4).join(' ').trim();
+                }
+            }
+
+            let compact = stripArabicMarksForBasmalah(cleaned);
+            if (compact.startsWith('بسماللهالرحمنالرحيم')) {
+                // Handles rare cases where the full basmalah is glued to the rest without normal spacing.
+                return cleaned
+                    .replace(/^.*?الر[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*ح[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*ي[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*م[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]*/u, '')
+                    .trim();
+            }
+            return cleaned;
+        }
+
+        function getAyahDisplayText(ayahText, surahNumber, ayahNumber) {
+            let displayText = ayahText || "";
+            if (ayahNumber === 1) {
+                displayText = removeUthmaniBasmalah(displayText, surahNumber);
+            }
+            if (activeFont === 'standard') {
+                displayText = normalizeArabicText(displayText);
+            }
+            return displayText.trim();
         }
 
         function loadSavedSettingsFromStorage() {
@@ -910,6 +1009,7 @@
             updateStatsUI();
             updateQuickShortcutButtonUI();
             renderMemPlansList();
+            syncSettingsChoiceUI();
         }
 
         async function loadQuran() {
@@ -1348,9 +1448,9 @@
                             عدد الآيات: ${formatArabicPageNumber(currentDay.ayahCount)} | الصفحات: ${formatArabicPageNumber(currentDay.startPage)} - ${formatArabicPageNumber(currentDay.endPage)}
                             ${currentDay.reviewText ? `<br>مراجعة مرافقة: ${currentDay.reviewText}` : ''}
                         </div>
-                        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-                            <button class="btn btn-success" style="flex:1; min-width:140px; padding:8px; font-size:12px;" onclick="startMemPlanReading(${idx})"><i class="fas fa-play"></i> ${currentDay.type === 'memorize' ? 'ابدأ الحفظ' : 'ابدأ المراجعة'}</button>
-                            <button class="btn btn-info" style="flex:1; min-width:140px; padding:8px; font-size:12px;" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-clipboard-check"></i> امتحان بنطاق تختاره</button>
+                        <div style="margin-top:10px; display:flex; gap:8px;">
+                            <button class="btn btn-success" style="flex:1; padding:8px; font-size:12px;" onclick="startMemPlanReading(${idx})"><i class="fas fa-play"></i> ابدأ الحفظ</button>
+                            ${currentDay.examDay ? `<button class="btn btn-info" style="flex:1; padding:8px; font-size:12px;" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-clipboard-check"></i> امتحان</button>` : ''}
                         </div>
                     </div>` : `
                     <div style="margin-top:15px; padding:10px; background:rgba(34,197,94,0.1); border-radius:8px; border:1px solid var(--success);">
@@ -1496,6 +1596,10 @@
             if (!currentDay) { alert('مبارك! لقد أكملت هذه الخطة بنجاح! 🎉'); return; }
             let dayIdx = plan.schedule.indexOf(currentDay);
             goToPageFromPlan(currentDay.startPage, planIdx, dayIdx);
+        }
+
+        function startMemExamFromReader() {
+            if (currentMemPlanId !== null && currentMemDayIdx !== null) startMemExam(currentMemPlanId, currentMemDayIdx);
         }
 
         function buildExamItemsForScope(plan, dayIdx, scope) {
@@ -1645,6 +1749,8 @@
             let box = document.getElementById('seq-prompt-box');
             let status = document.getElementById('seq-status');
             if (!box || !status) return;
+            let ratingArea = document.getElementById('seq-rating-area');
+            if (ratingArea) ratingArea.style.display = 'flex';
             box.classList.remove('seq-ayah-correct', 'seq-ayah-weak', 'seq-ayah-wrong');
             status.className = 'seq-status ' + result;
             document.querySelectorAll('.exam-answer-area .exam-btn').forEach(b => b.classList.remove('selected'));
@@ -1712,16 +1818,22 @@
                     return;
                 }
                 let surah = quranData[currentAyah.surahIdx];
+                let answerAyah = getNextAyahObject(currentAyah);
                 contentDiv.innerHTML = `
                     <div class="exam-question">
                         <div style="color:var(--gold); font-size:13px; margin-bottom:10px;">سؤال ${currentQ + 1} من ${selectedAyahs.length} - ${formatSurahHeaderName(surah.name)} (آية ${currentAyah.ayahNum})</div>
-                        <div style="color:var(--text-muted); font-size:12px; margin-bottom:8px; line-height:1.8;">اقرأ من قوله تعالى، ثم قيّم أداءك أو أداء من تمتحنه. بعد اختيار النتيجة سينتقل البرنامج تلقائيًا للآية التالية.</div>
+                        <div style="color:var(--text-muted); font-size:12px; margin-bottom:8px; line-height:1.8;">اقرأ من قوله تعالى في سرك أو أمام من يمتحنك، ثم اكشف الآية التالية للتصحيح، وبعدها اختر التقييم. بعد التقييم ينتقل البرنامج تلقائيًا للآية التالية.</div>
                         <div id="seq-prompt-box" class="exam-ayah" data-key="${currentAyah.key}">
                             <div style="color:var(--gold); font-size:12px; font-family:'Cairo'; margin-bottom:6px;">اقرأ من قوله تعالى:</div>
                             ${currentAyah.text}
                         </div>
+                        <button id="seq-reveal-btn" class="btn btn-info" style="width:100%; margin-top:10px;" onclick="revealSequentialAnswer()"><i class="fas fa-eye"></i> إظهار الآية التالية للتصحيح</button>
+                        <div id="seq-answer-box" class="exam-reveal-box">
+                            <div style="font-family:'Cairo'; font-size:12px; color:var(--gold); margin-bottom:6px;">الآية التالية الصحيحة:</div>
+                            ${answerAyah ? answerAyah.text : 'هذه نهاية السورة/النطاق.'}
+                        </div>
                         <div id="seq-status" class="seq-status"></div>
-                        <div id="seq-rating-area" class="exam-answer-area" style="display:flex;">
+                        <div id="seq-rating-area" class="exam-answer-area" style="display:none;">
                             <button class="exam-btn correct" onclick="recordSequentialAyah('correct')"><i class="fas fa-check-circle"></i> صحيحة</button>
                             <button class="exam-btn weak" onclick="recordSequentialAyah('weak')"><i class="fas fa-exclamation-circle"></i> متردد</button>
                             <button class="exam-btn wrong" onclick="recordSequentialAyah('wrong')"><i class="fas fa-times-circle"></i> خطأ</button>
@@ -1739,14 +1851,28 @@
                 renderCurrentAyah();
             }
 
+
+            window.revealSequentialAnswer = function() {
+                let answerBox = document.getElementById('seq-answer-box');
+                let ratingArea = document.getElementById('seq-rating-area');
+                let revealBtn = document.getElementById('seq-reveal-btn');
+                if (answerBox) answerBox.classList.add('active');
+                if (ratingArea) ratingArea.style.display = 'flex';
+                if (revealBtn) {
+                    revealBtn.innerHTML = '<i class="fas fa-check"></i> تم إظهار الجواب، قيّم القراءة الآن';
+                    revealBtn.disabled = true;
+                }
+            };
+
             window.recordSequentialAyah = function(result) {
                 if (!currentAyah) return;
-                let recordedAyah = currentAyah;
-                resultsByKey[recordedAyah.key] = { result, key: recordedAyah.key, ayah: recordedAyah };
+                let promptAyah = currentAyah;
+                let recordedAyah = getNextAyahObject(promptAyah) || promptAyah;
+                resultsByKey[recordedAyah.key] = { result, key: recordedAyah.key, ayah: recordedAyah, promptKey: promptAyah.key };
                 setSequentialVisualStatus(result);
                 document.querySelectorAll('.exam-answer-area .exam-btn').forEach(b => b.disabled = true);
                 autoTimer = setTimeout(() => {
-                    currentAyah = getNextAyahObject(recordedAyah);
+                    currentAyah = recordedAyah && recordedAyah.key !== promptAyah.key ? recordedAyah : null;
                     if (!currentAyah) {
                         currentQ++;
                         showQuestionStart();
@@ -2515,6 +2641,33 @@
         }
 
         // ===== SETTINGS & NAVIGATION =====
+
+        function syncSettingsChoiceUI() {
+            const pairs = [
+                ['click-action-radio', clickAction],
+                ['display-mode-radio', viewMode],
+                ['font-view-radio', activeFont],
+                ['reciter-radio', activeReciter],
+                ['device-view-radio', currentDeviceView],
+                ['theme-radio', activeTheme]
+            ];
+            pairs.forEach(([name, val]) => {
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => { r.checked = (r.value === val); });
+            });
+            const selects = {
+                'click-action-select': clickAction,
+                'display-mode-select': viewMode,
+                'font-view-select': activeFont,
+                'reciter-select': activeReciter,
+                'device-view-select': currentDeviceView,
+                'theme-select': activeTheme
+            };
+            Object.keys(selects).forEach(id => {
+                let el = document.getElementById(id);
+                if (el) el.value = selects[id];
+            });
+        }
+
         function switchSection(secId, btn) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active')); 
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -2529,6 +2682,7 @@
             localStorage.setItem('quran_setting_click', val); 
             document.getElementById('click-action-select').value = val; 
             updateQuickShortcutButtonUI(); 
+            syncSettingsChoiceUI();
         }
 
         function setDisplayMode(val) { 
@@ -2536,11 +2690,13 @@
             localStorage.setItem('quran_setting_viewmode', val); 
             localStorage.removeItem('quran_bookmark_page'); 
             if (quranData.length > 0) { renderMushafText(); } 
+            syncSettingsChoiceUI();
         }
 
         function changeReciter(val) { 
             activeReciter = val; 
             localStorage.setItem('quran_setting_reciter', val); 
+            syncSettingsChoiceUI();
         }
 
         function changeDailyWardTarget(val) { 
@@ -2555,6 +2711,7 @@
             if (val === 'uthmani') { document.body.classList.add('font-uthmani'); document.body.classList.remove('font-standard'); } 
             else { document.body.classList.remove('font-uthmani'); document.body.classList.add('font-standard'); }
             if (quranData.length > 0) renderMushafText();
+            syncSettingsChoiceUI();
         }
 
         function changeDeviceView(view) {
@@ -2562,6 +2719,7 @@
             localStorage.setItem('quran_setting_device', view);
             if (view === 'mobile') document.body.classList.add('device-mobile'); else document.body.classList.remove('device-mobile');
             if (quranData.length > 0) renderMushafText();
+            syncSettingsChoiceUI();
         }
 
         function changeTheme(t) { 
@@ -2569,6 +2727,7 @@
             localStorage.setItem('quran_setting_theme', t); 
             document.body.className = document.body.className.replace(/theme-\S+/g, ''); 
             if (t !== 'default') document.body.classList.add('theme-' + t); 
+            syncSettingsChoiceUI();
         }
 
         function shuffleArray(array) { 
@@ -2669,17 +2828,15 @@
                         let surah = quranData[ayah.surahIdx];
                         let surahName = formatSurahHeaderName(surah.name);
                         html += `<div class="surah-header-frame"><div class="surah-header-title">${surahName}</div></div>`;
-                        if (ayah.ayahNum === 1 && ayah.surahIdx !== 0 && ayah.surahIdx !== 8) {
-                            html += `<div style="text-align:center; font-family:'Amiri',serif; font-size:22px; color:var(--gold); margin:15px 0;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+                        if (ayah.ayahNum === 1) {
+                            html += renderBasmalahSeparator(surah.number);
                         }
                     }
 
                     let reviewStatus = getAyahReviewStatus(ayah.key);
                     let noteClass = (ayahNotesStorage[ayah.key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
-                    let ayahText = ayah.text;
-                    if (activeFont === 'standard') {
-                        ayahText = normalizeArabicText(ayahText);
-                    }
+                    let ayahText = getAyahDisplayText(ayah.text, ayah.surahNum, ayah.ayahNum);
+                    if (!ayahText) return;
 
                     html += `<span class="ayah-span ${noteClass}" data-key="${ayah.key}" onclick="handleAyahClick('${ayah.key}')" ondblclick="openNoteModalForAyah('${ayah.key}')">${ayahText}</span>`;
                     html += `<span class="ayah-end-ornament"><span class="ayah-num-inside">${formatArabicPageNumber(ayah.ayahNum)}</span></span> `;
@@ -2709,19 +2866,15 @@
                 footer.innerText = formatSurahHeaderName(surah.name) + ' - ' + surah.ayahs.length + ' آية';
 
                 let html = `<div class="surah-header-frame"><div class="surah-header-title">${formatSurahHeaderName(surah.name)}</div></div>`;
-                if (currentSelectedSurahIdx !== 0 && currentSelectedSurahIdx !== 8) {
-                    html += `<div style="text-align:center; font-family:'Amiri',serif; font-size:22px; color:var(--gold); margin:15px 0;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
-                }
+                html += renderBasmalahSeparator(surah.number);
 
                 surah.ayahs.forEach((ayah, idx) => {
                     let ayahNum = idx + 1;
                     let key = `${surah.number}_${ayahNum}`;
                     let reviewStatus = getAyahReviewStatus(key);
                     let noteClass = (ayahNotesStorage[key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
-                    let ayahText = ayah.text;
-                    if (activeFont === 'standard') {
-                        ayahText = normalizeArabicText(ayahText);
-                    }
+                    let ayahText = getAyahDisplayText(ayah.text, surah.number, ayahNum);
+                    if (!ayahText) return;
                     html += `<span class="ayah-span ${noteClass}" data-key="${key}" onclick="handleAyahClick('${key}')" ondblclick="openNoteModalForAyah('${key}')">${ayahText}</span>`;
                     html += `<span class="ayah-end-ornament"><span class="ayah-num-inside">${formatArabicPageNumber(ayahNum)}</span></span> `;
                 });
