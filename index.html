@@ -139,6 +139,11 @@
 
         .ayah-span { padding: 2px 4px; border-radius: 4px; cursor: pointer; transition: background-color 0.25s ease, color 0.25s ease; position: relative; display: inline; scroll-margin: 140px; }
         .ayah-span.focused-active { background-color: rgba(212, 175, 55, 0.18) !important; color: var(--gold) !important; box-shadow: 0 0 8px rgba(212, 175, 55, 0.3); border-radius: 6px; }
+        .ayah-span.mem-plan-range { background: linear-gradient(180deg, rgba(212,175,55,0.08), rgba(34,197,94,0.10)) !important; border-bottom: 2px solid rgba(212,175,55,0.65); box-shadow: inset 0 -8px 0 rgba(212,175,55,0.06); }
+        .ayah-span.mem-plan-start { background: rgba(212,175,55,0.24) !important; color: var(--gold) !important; border: 1px solid var(--gold); border-radius: 8px; box-shadow: 0 0 0 3px rgba(212,175,55,0.12), 0 0 18px rgba(212,175,55,0.22); scroll-margin: 170px; }
+        .ayah-span.mem-plan-start::before { content: 'ابدأ من هنا'; position: absolute; top: -32px; right: 0; font-family: 'Cairo', sans-serif; font-size: 10px; line-height: 1; white-space: nowrap; color: #000; background: var(--gold); border-radius: 999px; padding: 6px 10px; box-shadow: 0 5px 14px rgba(0,0,0,0.25); z-index: 3; }
+        .ayah-span.mem-plan-end { border-left: 2px solid var(--success); border-radius: 8px; }
+
         .ayah-span.has-note { border-bottom: 2px dotted var(--warning); }
         @media (min-width: 769px) { .ayah-span:hover:not(.focused-active) { background-color: rgba(212, 175, 55, 0.06); border-radius: 4px; } }
 
@@ -699,7 +704,7 @@
                 </div>
             </div>
 
-            <div class="settings-row">
+            <div class="settings-row" id="daily-ward-settings-row" style="display:none;">
                 <div>
                     <h3>الورد اليومي المستهدف</h3>
                     <p>حساب مقدار الإنجاز اليومي والصفحات تلقائياً بمجرد المرور عليها</p>
@@ -810,7 +815,7 @@
 
     <script>
 
-        const CURRENT_VERSION_BUILD = "v31.1_" + Date.now();
+        const CURRENT_VERSION_BUILD = "v31.2_mem_start_highlight_ward_disabled_" + Date.now();
 
         let quranData = [];
         let viewMode = 'pages'; 
@@ -982,8 +987,9 @@
             activeTafsirs = JSON.parse(localStorage.getItem('quran_active_tafsirs')) || ['ibn-kathir'];
             memPlans = JSON.parse(localStorage.getItem('quran_mem_plans')) || [];
 
-            let savedWard = localStorage.getItem('quran_setting_ward_target');
-            dailyWardTarget = (savedWard !== null) ? parseInt(savedWard) : 0;
+            // الورد اليومي المستهدف معطل ومخفي حالياً، والكود محفوظ للرجوع إليه لاحقاً.
+            dailyWardTarget = 0;
+            localStorage.setItem('quran_setting_ward_target', '0');
             currentPageNum = parseInt(localStorage.getItem('quran_bookmark_page')) || 1;
             currentSelectedSurahIdx = parseInt(localStorage.getItem('quran_bookmark_surah_idx')) || 0;
 
@@ -1533,9 +1539,12 @@
 
         function goToPageFromPlan(page, planIdx, dayIdx) {
             closeDayDetail();
-            currentPageNum = page;
-            localStorage.setItem('quran_bookmark_page', page);
-            let pageAyahs = finalPageArray[page] || [];
+            let plan = memPlans[planIdx];
+            let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
+            let targetPage = day && day.startPage ? day.startPage : page;
+            currentPageNum = targetPage;
+            localStorage.setItem('quran_bookmark_page', targetPage);
+            let pageAyahs = finalPageArray[targetPage] || [];
             if (pageAyahs.length > 0) {
                 currentSelectedSurahIdx = pageAyahs[0].surahIdx;
                 localStorage.setItem('quran_bookmark_surah_idx', currentSelectedSurahIdx);
@@ -1549,6 +1558,7 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
+            setTimeout(() => scrollToMemPlanStartAyah(), 120);
         }
 
         function toggleDayComplete(planIdx, dayIdx) {
@@ -1569,6 +1579,31 @@
             if (currentMemPlanId !== null && currentMemDayIdx !== null) toggleDayComplete(currentMemPlanId, currentMemDayIdx);
         }
 
+
+        function getActiveMemDayRangeKeys() {
+            if (currentMemPlanId === null || currentMemDayIdx === null) return null;
+            let plan = memPlans[currentMemPlanId];
+            let day = plan && plan.schedule ? plan.schedule[currentMemDayIdx] : null;
+            if (!day || !Array.isArray(day.ayahItems) || !day.ayahItems.length) return null;
+            return {
+                startKey: day.ayahItems[0].key,
+                endKey: day.ayahItems[day.ayahItems.length - 1].key,
+                keys: new Set(day.ayahItems.map(a => a.key))
+            };
+        }
+
+        function scrollToMemPlanStartAyah(instant = false) {
+            if (currentMemPlanId === null || currentMemDayIdx === null) return;
+            let plan = memPlans[currentMemPlanId];
+            let day = plan && plan.schedule ? plan.schedule[currentMemDayIdx] : null;
+            if (!day || !day.startSurah || !day.startAyah) return;
+            let startKey = `${day.startSurah}_${day.startAyah}`;
+            let el = document.querySelector(`.ayah-span[data-key="${startKey}"]`);
+            if (!el) return;
+            document.querySelectorAll('.ayah-span.focused-active').forEach(s => s.classList.remove('focused-active'));
+            el.classList.add('focused-active');
+            el.scrollIntoView({ behavior: instant ? 'auto' : 'smooth', block: 'center' });
+        }
         function updateMemPlanReaderBar() {
             let bar = document.getElementById('mem-plan-reader-bar');
             if (currentMemPlanId === null || currentMemDayIdx === null) { bar.classList.remove('active'); return; }
@@ -2700,8 +2735,9 @@
         }
 
         function changeDailyWardTarget(val) { 
-            dailyWardTarget = parseInt(val); 
-            localStorage.setItem('quran_setting_ward_target', val); 
+            // الميزة متوقفة حالياً مع إبقاء الكود محفوظاً.
+            dailyWardTarget = 0; 
+            localStorage.setItem('quran_setting_ward_target', '0'); 
             updateWardUIProgress(); 
         }
 
@@ -2834,7 +2870,11 @@
                     }
 
                     let reviewStatus = getAyahReviewStatus(ayah.key);
-                    let noteClass = (ayahNotesStorage[ayah.key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
+                    let memRange = getActiveMemDayRangeKeys();
+                    let memClass = memRange && memRange.keys.has(ayah.key) ? 'mem-plan-range ' : '';
+                    if (memRange && ayah.key === memRange.startKey) memClass += 'mem-plan-start ';
+                    if (memRange && ayah.key === memRange.endKey) memClass += 'mem-plan-end ';
+                    let noteClass = memClass + (ayahNotesStorage[ayah.key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
                     let ayahText = getAyahDisplayText(ayah.text, ayah.surahNum, ayah.ayahNum);
                     if (!ayahText) return;
 
@@ -2849,11 +2889,7 @@
                 leftSidebar.innerHTML = `<div class="sidebar-indicator"><span class="sidebar-indicator-text">جزء ${formatArabicPageNumber(juzNum)}</span></div>`;
                 rightSidebar.innerHTML = `<div class="sidebar-indicator"><span class="sidebar-indicator-text">${formatArabicPageNumber(currentPageNum)}</span></div>`;
 
-                // Ward tracking
-                if (dailyWardTarget > 0 && !readPagesToday.includes(currentPageNum)) {
-                    readPagesToday.push(currentPageNum);
-                    localStorage.setItem('quran_ward_pages_array', JSON.stringify(readPagesToday));
-                }
+                // Ward tracking disabled: kept for possible future reactivation.
                 updateWardUIProgress();
 
                 // Navigation buttons
@@ -2872,7 +2908,11 @@
                     let ayahNum = idx + 1;
                     let key = `${surah.number}_${ayahNum}`;
                     let reviewStatus = getAyahReviewStatus(key);
-                    let noteClass = (ayahNotesStorage[key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
+                    let memRange = getActiveMemDayRangeKeys();
+                    let memClass = memRange && memRange.keys.has(key) ? 'mem-plan-range ' : '';
+                    if (memRange && key === memRange.startKey) memClass += 'mem-plan-start ';
+                    if (memRange && key === memRange.endKey) memClass += 'mem-plan-end ';
+                    let noteClass = memClass + (ayahNotesStorage[key] ? 'has-note ' : '') + (reviewStatus === 'wrong' ? 'needs-review-wrong' : (reviewStatus === 'weak' ? 'needs-review-weak' : (reviewStatus === 'reviewing' ? 'needs-review-reviewing' : '')));
                     let ayahText = getAyahDisplayText(ayah.text, surah.number, ayahNum);
                     if (!ayahText) return;
                     html += `<span class="ayah-span ${noteClass}" data-key="${key}" onclick="handleAyahClick('${key}')" ondblclick="openNoteModalForAyah('${key}')">${ayahText}</span>`;
@@ -2922,20 +2962,17 @@
             let barText = document.getElementById('ward-bar-text');
             if (!barFill || !barText) return;
 
-            if (dailyWardTarget === 0) {
-                document.getElementById('mushaf-ward-bar-wrapper').style.display = 'none';
-                document.getElementById('stats-ward-cell-box').style.display = 'none';
-                return;
-            }
-
-            document.getElementById('mushaf-ward-bar-wrapper').style.display = 'flex';
-            document.getElementById('stats-ward-cell-box').style.display = 'flex';
-
-            let completed = readPagesToday.length;
-            let pct = Math.min(100, Math.round((completed / dailyWardTarget) * 100));
-            barFill.style.width = pct + '%';
-            barText.innerText = `مؤشر الورد القرآني اليومي: ${completed} من ${dailyWardTarget} صفحة (${pct}%)`;
-            document.getElementById('stats-ward-score').innerText = `${completed} / ${dailyWardTarget}`;
+            // الميزة متوقفة ومخفية حالياً دون حذف الكود المرتبط بها.
+            dailyWardTarget = 0;
+            let wardWrapper = document.getElementById('mushaf-ward-bar-wrapper');
+            let statsWardCell = document.getElementById('stats-ward-cell-box');
+            let settingsRow = document.getElementById('daily-ward-settings-row');
+            if (wardWrapper) wardWrapper.style.display = 'none';
+            if (statsWardCell) statsWardCell.style.display = 'none';
+            if (settingsRow) settingsRow.style.display = 'none';
+            barFill.style.width = '0%';
+            barText.innerText = 'مؤشر الورد القرآني اليومي متوقف حالياً';
+            return;
         }
 
         // ===== NOTE MODAL FUNCTIONS =====
