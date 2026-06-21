@@ -165,11 +165,11 @@
         .tafsir-panel .tafsir-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; }
 
         .surah-header-frame {
-            display: flex; align-items: center; justify-content: center; width: 94%; max-width: 520px; margin: 10px auto 25px auto; height: 64px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 90" fill="none"><path d="M50 45 L20 15 L10 15 L10 75 L20 75 Z M550 45 L580 15 L590 15 L590 75 L580 75 Z" stroke="%23d4af37" stroke-width="2" fill="rgba(212,175,55,0.05)"/><path d="M50 15 L550 15 M50 75 L550 75" stroke="%23d4af37" stroke-width="3"/><path d="M60 22 L540 22 M60 68 L540 68" stroke="%23d4af37" stroke-width="1" stroke-dasharray="3,3"/><path d="M35 30 L45 45 L35 60 L25 45 Z M565 30 L575 45 L565 60 L555 45 Z" fill="%23d4af37"/><circle cx="90" cy="45" r="5" fill="%23d4af37"/><circle cx="510" cy="45" r="5" fill="%23d4af37"/><path d="M120 45 C 200 25, 400 25, 480 45" stroke="%23d4af37" stroke-width="1" fill="none" opacity="0.4"/></svg>');
-            background-size: 100% 100%; background-repeat: no-repeat; position: relative;
+            display: flex; align-items: center; justify-content: center; width: 96%; max-width: 560px; margin: 12px auto 28px auto; height: 78px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 108" fill="none"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="%23d4af37" stop-opacity="0.10"/><stop offset="0.5" stop-color="%23d4af37" stop-opacity="0.23"/><stop offset="1" stop-color="%23d4af37" stop-opacity="0.10"/></linearGradient></defs><path d="M82 15 H638 L690 54 L638 93 H82 L30 54 Z" fill="url(%23g)" stroke="%23d4af37" stroke-width="3"/><path d="M105 26 H615 L650 54 L615 82 H105 L70 54 Z" stroke="%23d4af37" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.9"/><path d="M22 54 C42 20,70 20,92 54 C70 88,42 88,22 54 Z M698 54 C678 20,650 20,628 54 C650 88,678 88,698 54 Z" stroke="%23d4af37" stroke-width="2" fill="rgba(212,175,55,0.08)"/><path d="M350 17 C356 7,364 7,370 17 C364 27,356 27,350 17 Z M350 91 C356 81,364 81,370 91 C364 101,356 101,350 91 Z" fill="%23d4af37"/><circle cx="118" cy="54" r="6" fill="%23d4af37"/><circle cx="602" cy="54" r="6" fill="%23d4af37"/><path d="M145 54 C210 28,285 28,335 54 C285 80,210 80,145 54 Z M385 54 C435 28,510 28,575 54 C510 80,435 80,385 54 Z" stroke="%23d4af37" stroke-width="1" opacity="0.55"/><path d="M168 34 C205 18,252 18,290 34 M430 34 C468 18,515 18,552 34 M168 74 C205 90,252 90,290 74 M430 74 C468 90,515 90,552 74" stroke="%23d4af37" stroke-width="1.3" opacity="0.7"/></svg>');
+            background-size: 100% 100%; background-repeat: no-repeat; position: relative; scroll-margin: 150px;
         }
-        .surah-header-title { font-family: 'Amiri', serif; font-size: 25px; font-weight: bold; color: var(--gold); text-shadow: 0 0 4px rgba(0,0,0,0.4); }
+        .surah-header-title { font-family: 'Amiri', serif; font-size: 27px; font-weight: bold; color: var(--gold); text-shadow: 0 2px 6px rgba(0,0,0,0.45); padding: 0 36px; }
         .basmalah-separator { text-align: center; font-family: 'Amiri', 'Lateef', serif; font-size: 24px; line-height: 2; color: var(--gold); margin: 14px 0 18px 0; letter-spacing: 0.3px; }
 
         .ayah-end-ornament {
@@ -756,7 +756,7 @@
             </div>
 
             <div class="settings-row" style="border-color: var(--gold); background: rgba(212,175,55,0.02); justify-content: center; padding: 20px;">
-                <span style="font-weight: 900; color: var(--gold); font-size: 14px; background: rgba(212,175,55,0.1); padding: 8px 20px; border-radius: 6px; border: 1px dashed var(--gold); letter-spacing: 0.5px;">Quran_31_Ultimate_Pro</span>
+                <span style="font-family: 'Amiri', serif; font-weight: 900; color: var(--gold); font-size: 18px; background: linear-gradient(90deg, rgba(212,175,55,0.06), rgba(212,175,55,0.18), rgba(212,175,55,0.06)); padding: 10px 28px; border-radius: 999px; border: 1px solid var(--gold); box-shadow: 0 0 18px rgba(212,175,55,0.12); letter-spacing: 0.3px;">منصة القرآن الكريم الرقمية — الإصدار الأوّل ١.١</span>
             </div>
         </div>
     </div>
@@ -1559,6 +1559,7 @@
             renderMushafText();
             updateMemPlanReaderBar();
             setTimeout(() => scrollToMemPlanStartAyah(), 120);
+            setTimeout(() => scrollToMemPlanStartAyah(), 450);
         }
 
         function toggleDayComplete(planIdx, dayIdx) {
@@ -2797,12 +2798,12 @@
             return null;
         }
 
-        function openSurahReader(idx) {
+        function openSurahReader(idx, options = {}) {
             currentSelectedSurahIdx = idx;
             localStorage.setItem('quran_bookmark_surah_idx', idx);
             if (viewMode === 'pages') {
                 let startPage = surahStartPageMap[idx] || 1;
-                currentPageNum = startPage;
+                if (!options.keepCurrentPage) currentPageNum = startPage;
                 localStorage.setItem('quran_bookmark_page', currentPageNum);
             }
             localStorage.setItem('quran_reader_was_open', 'true');
@@ -2811,6 +2812,29 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
+            if (options.scrollToSurahStart) setTimeout(() => scrollToSurahStart(idx), 120);
+            if (options.highlightAyahKey) setTimeout(() => focusAyahByKey(options.highlightAyahKey), 120);
+        }
+
+        function focusAyahByKey(key) {
+            let el = document.querySelector(`.ayah-span[data-key="${key}"]`);
+            if (!el) return false;
+            document.querySelectorAll('.ayah-span.focused-active').forEach(s => s.classList.remove('focused-active'));
+            el.classList.add('focused-active');
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return true;
+        }
+
+        function scrollToSurahStart(idx) {
+            let surah = quranData[idx];
+            if (!surah) return;
+            let header = document.querySelector(`.surah-header-frame[data-surah-start="${surah.number}"]`);
+            if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            let firstVisibleKey = `${surah.number}_1`;
+            if (!focusAyahByKey(firstVisibleKey)) {
+                // في الفاتحة أو السور التي تُعرض البسملة منفصلة قد لا يظهر نص الآية الأولى بعد حذف البسملة، لذلك نكتفي باسم السورة.
+                if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function closeReader() {
@@ -2863,7 +2887,7 @@
                         currentSurahIdxOnPage = ayah.surahIdx;
                         let surah = quranData[ayah.surahIdx];
                         let surahName = formatSurahHeaderName(surah.name);
-                        html += `<div class="surah-header-frame"><div class="surah-header-title">${surahName}</div></div>`;
+                        html += `<div class="surah-header-frame" data-surah-start="${surah.number}"><div class="surah-header-title">${surahName}</div></div>`;
                         if (ayah.ayahNum === 1) {
                             html += renderBasmalahSeparator(surah.number);
                         }
@@ -2901,7 +2925,7 @@
                 let surah = quranData[currentSelectedSurahIdx];
                 footer.innerText = formatSurahHeaderName(surah.name) + ' - ' + surah.ayahs.length + ' آية';
 
-                let html = `<div class="surah-header-frame"><div class="surah-header-title">${formatSurahHeaderName(surah.name)}</div></div>`;
+                let html = `<div class="surah-header-frame" data-surah-start="${surah.number}"><div class="surah-header-title">${formatSurahHeaderName(surah.name)}</div></div>`;
                 html += renderBasmalahSeparator(surah.number);
 
                 surah.ayahs.forEach((ayah, idx) => {
@@ -3079,22 +3103,15 @@
             document.getElementById('surah-search').value = '';
 
             if (type === 'surah') {
-                openSurahReader(surahIdx);
+                currentPageNum = surahStartPageMap[surahIdx] || 1;
+                localStorage.setItem('quran_bookmark_page', currentPageNum);
+                openSurahReader(surahIdx, { keepCurrentPage: true, scrollToSurahStart: true });
             } else {
                 currentPageNum = page;
                 currentSelectedSurahIdx = surahIdx;
                 localStorage.setItem('quran_bookmark_page', page);
                 localStorage.setItem('quran_bookmark_surah_idx', surahIdx);
-                openSurahReader(surahIdx);
-
-                // Highlight the specific ayah
-                setTimeout(() => {
-                    let el = document.querySelector(`.ayah-span[data-key="${ayahKey}"]`);
-                    if (el) {
-                        el.classList.add('focused-active');
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }, 100);
+                openSurahReader(surahIdx, { keepCurrentPage: true, highlightAyahKey: ayahKey });
             }
         }
 
