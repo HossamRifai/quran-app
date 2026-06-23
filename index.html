@@ -304,6 +304,21 @@
             padding: 10px 5px; text-align: center; cursor: pointer; transition: 0.2s;
         }
         .day-detail-modal .page-item:hover { border-color: var(--gold); background: rgba(212,175,55,0.1); }
+        .mem-current-day-card { background: linear-gradient(135deg, rgba(212,175,55,0.13), rgba(34,197,94,0.07)); border: 1px solid var(--gold); border-radius: 14px; padding: 16px; margin-top: 15px; box-shadow: 0 8px 22px rgba(0,0,0,0.18); }
+        .mem-current-day-card .current-title { color: var(--gold); font-weight: 900; font-size: 15px; margin-bottom: 8px; display:flex; align-items:center; gap:7px; }
+        .mem-current-day-card .current-range { color: var(--text-main); font-size: 13px; line-height: 1.8; }
+        .mem-current-day-card .current-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+        .mem-current-day-card .current-actions .btn { flex:1; min-width:150px; padding:9px; font-size:12px; }
+        .mem-last-position-pill { display:inline-flex; align-items:center; gap:6px; color:var(--info); background:rgba(59,130,246,0.10); border:1px solid rgba(59,130,246,0.45); border-radius:999px; padding:6px 10px; font-size:11px; margin-top:8px; cursor:pointer; }
+        .mem-day-badge.future { opacity: 0.55; }
+        .mem-day-badge.current { position: relative; transform: translateY(-2px); }
+        .mem-day-badge.current::after { content: 'اليوم'; position:absolute; top:-22px; right:50%; transform:translateX(50%); font-size:9px; background:var(--gold); color:#000; border-radius:999px; padding:2px 7px; white-space:nowrap; }
+        .mem-ayah-grid { grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill,minmax(54px,1fr)); gap:7px; margin-top:12px; }
+        .mem-ayah-jump { background:var(--bg-dark); border:1px solid var(--border); border-radius:10px; padding:9px 6px; text-align:center; cursor:pointer; transition:0.2s; font-family:'Cairo',sans-serif; }
+        .mem-ayah-jump:hover { border-color:var(--gold); background:rgba(212,175,55,0.10); transform:translateY(-1px); }
+        .mem-ayah-jump .ayah-num { color:var(--gold); font-weight:900; font-size:13px; }
+        .mem-ayah-jump .ayah-surah { color:var(--text-muted); font-size:9px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .mem-ayah-jump.last-position { box-shadow:0 0 0 2px rgba(59,130,246,0.28); border-color:var(--info); }
         .day-detail-modal .page-item .page-num { color: var(--gold); font-weight: bold; font-size: 14px; }
         .day-detail-modal .page-item .page-juz { color: var(--text-muted); font-size: 10px; margin-top: 2px; }
         .day-detail-modal .day-actions { display: flex; gap: 10px; margin-top: 20px; }
@@ -580,8 +595,8 @@
                     <div class="form-group">
                         <label>نمط الجدولة</label>
                         <select id="mem-plan-pattern" onchange="updateMemPlanCalc()">
-                            <option value="6-1">6 أيام حفظ + يوم مراجعة</option>
-                            <option value="5-2">5 أيام حفظ + يومان مراجعة</option>
+                            <option value="6-1">6 أيام حفظ + يوم تسميع/مراجعة</option>
+                            <option value="5-2">5 أيام حفظ + يومان تسميع/مراجعة</option>
                             <option value="daily-review">حفظ يومي + مراجعة يومية</option>
                             <option value="custom">تخصيص يدوي</option>
                         </select>
@@ -771,7 +786,7 @@
             </div>
 
             <div class="settings-row" style="border-color: var(--gold); background: rgba(212,175,55,0.02); justify-content: center; padding: 20px;">
-                <span style="font-weight: 900; color: var(--gold); font-size: 14px; background: rgba(212,175,55,0.1); padding: 8px 20px; border-radius: 6px; border: 1px dashed var(--gold); letter-spacing: 0.5px;">Quran_1.1_Ultimate_Pro</span>
+                <span style="font-weight: 900; color: var(--gold); font-size: 14px; background: rgba(212,175,55,0.1); padding: 8px 20px; border-radius: 6px; border: 1px dashed var(--gold); letter-spacing: 0.5px;">منصة القرآن الكريم الرقمية - النسخة الأولى</span>
             </div>
         </div>
     </div>
@@ -830,7 +845,7 @@
 
     <script>
 
-        const CURRENT_VERSION_BUILD = "v1.1_mem_review_counter_live_update_" + Date.now();
+        const CURRENT_VERSION_BUILD = "v1.3_dynamic_word_weight_tasmee_days_" + Date.now();
 
         let quranData = [];
         let viewMode = 'pages'; 
@@ -1005,8 +1020,9 @@
             // الورد اليومي المستهدف معطل ومخفي حالياً، والكود محفوظ للرجوع إليه لاحقاً.
             dailyWardTarget = 0;
             localStorage.setItem('quran_setting_ward_target', '0');
-            currentPageNum = parseInt(localStorage.getItem('quran_bookmark_page')) || 1;
-            currentSelectedSurahIdx = parseInt(localStorage.getItem('quran_bookmark_surah_idx')) || 0;
+            let globalLastPosition = getGlobalQuranLastPosition();
+            currentPageNum = (globalLastPosition && globalLastPosition.page) ? parseInt(globalLastPosition.page) : (parseInt(localStorage.getItem('quran_bookmark_page')) || 1);
+            currentSelectedSurahIdx = (globalLastPosition && globalLastPosition.surahIdx !== undefined) ? parseInt(globalLastPosition.surahIdx) : (parseInt(localStorage.getItem('quran_bookmark_surah_idx')) || 0);
 
             let savedDate = localStorage.getItem('quran_ward_date');
             if (savedDate === todayDateKey) { readPagesToday = JSON.parse(localStorage.getItem('quran_ward_pages_array')) || []; } 
@@ -1053,7 +1069,7 @@
                 player.addEventListener('timeupdate', updatePlayerProgress);
 
                 let savedReaderOpen = localStorage.getItem('quran_reader_was_open');
-                if(savedReaderOpen === 'true') { openSurahReader(currentSelectedSurahIdx); } 
+                if(savedReaderOpen === 'true') { openSurahReader(currentSelectedSurahIdx); setTimeout(() => { let last = getGlobalQuranLastPosition(); if (last && last.key) scrollToGlobalLastPosition(last.key); }, 160); } 
                 else { updateWardUIProgress(); }
             } catch (err) {
                 document.getElementById('quran-index').innerHTML = `<div style="color:var(--danger); text-align:center; padding:30px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> فشل اتصال المنصة بالخادم السحابي. يرجى التحقق من اتصال الإنترنت.</div>`;
@@ -1239,40 +1255,140 @@
             return 'memorize';
         }
 
-        function shouldBeExamDay(day, freq, dayType) {
+        function shouldBeExamDay(day, freq, dayType, pattern, memorizeSeq) {
+            // أيام التسميع/المراجعة الناتجة عن نمط الجدولة ليست أيام حفظ جديد،
+            // لكنها تبقى أيام تسميع فعلية حتى لو كان خيار الامتحانات الإضافية "بدون امتحانات".
+            if (dayType === 'review') return true;
+
             if (freq === 'none') return false;
             if (freq === 'daily' && dayType === 'memorize') return true;
-            if (freq === '3days' && dayType === 'memorize') return day % 3 === 0;
-            if (freq === 'weekly' && dayType === 'memorize') return day % 7 === 0;
+            if (freq === '3days' && dayType === 'memorize') return memorizeSeq > 0 && memorizeSeq % 3 === 0;
+            if (freq === 'weekly' && dayType === 'memorize') return memorizeSeq > 0 && memorizeSeq % 7 === 0;
             if (freq === 'juz') return false;
             return false;
         }
 
+        function countAyahWordsForPlan(text, surahNum, ayahNum) {
+            let cleanText = getAyahDisplayText(text || '', surahNum, ayahNum)
+                .replace(/[۞۩﴾﴿()\[\]{}،؛:؟.!ـ]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return cleanText ? cleanText.split(' ').filter(Boolean).length : 0;
+        }
+
+        function enrichPlanItemsWithWordWeights(items) {
+            return (items || []).map(item => ({
+                ...item,
+                wordWeight: countAyahWordsForPlan(item.text, item.surahNum, item.ayahNum)
+            }));
+        }
+
+        function buildWordWeightedMemorizationChunks(items, memorizeDays) {
+            let weightedItems = enrichPlanItemsWithWordWeights(items);
+            let totalWords = weightedItems.reduce((sum, item) => sum + (item.wordWeight || 0), 0);
+            let chunks = [];
+            let cursor = 0;
+
+            for (let memDay = 0; memDay < memorizeDays; memDay++) {
+                let remainingMemDays = memorizeDays - memDay;
+                let remainingWords = weightedItems.slice(cursor).reduce((sum, item) => sum + (item.wordWeight || 0), 0);
+                let dynamicTargetWords = remainingMemDays > 0 ? Math.ceil(remainingWords / remainingMemDays) : remainingWords;
+                let chunk = [];
+                let chunkWords = 0;
+
+                if (cursor >= weightedItems.length) {
+                    chunks.push({ items: [], wordWeight: 0, targetWords: dynamicTargetWords });
+                    continue;
+                }
+
+                while (cursor < weightedItems.length) {
+                    let nextAyah = weightedItems[cursor];
+                    let nextWeight = nextAyah.wordWeight || 0;
+                    let futureDaysAfterThis = remainingMemDays - 1;
+                    let remainingItemsAfterTakingNext = weightedItems.length - (cursor + 1);
+
+                    // لا نسمح بأن تنفد الآيات قبل أيام الحفظ القادمة، لكن هذا ليس هدف التقسيم؛
+                    // هو فقط حد أمان كي لا تصبح أيام لاحقة فارغة.
+                    let mustLeaveForFuture = futureDaysAfterThis > 0 && remainingItemsAfterTakingNext < futureDaysAfterThis;
+
+                    if (chunk.length === 0) {
+                        chunk.push(nextAyah);
+                        chunkWords += nextWeight;
+                        cursor++;
+                        if (mustLeaveForFuture) break;
+                        continue;
+                    }
+
+                    if (mustLeaveForFuture) break;
+
+                    let beforeDiff = Math.abs(dynamicTargetWords - chunkWords);
+                    let afterDiff = Math.abs(dynamicTargetWords - (chunkWords + nextWeight));
+
+                    // نأخذ الآية التالية كاملة فقط إذا كانت تقرّب اليوم من وزن الحفظ المستهدف.
+                    // عند التساوي نأخذها لتجنب ترحيل آيات قصيرة كثيرة إلى آخر الخطة.
+                    if (chunkWords < dynamicTargetWords && afterDiff <= beforeDiff) {
+                        chunk.push(nextAyah);
+                        chunkWords += nextWeight;
+                        cursor++;
+                        if (chunkWords >= dynamicTargetWords) break;
+                    } else {
+                        break;
+                    }
+                }
+
+                chunks.push({ items: chunk, wordWeight: chunkWords, targetWords: dynamicTargetWords });
+            }
+
+            // إذا بقيت آيات بسبب فروق الأطوال، نلحقها بآخر يوم حفظ غير فارغ ولا نكسر أي آية.
+            while (cursor < weightedItems.length) {
+                let extra = weightedItems[cursor++];
+                let targetChunk = chunks.slice().reverse().find(c => c.items && c.items.length) || chunks[chunks.length - 1];
+                if (!targetChunk) {
+                    chunks.push({ items: [extra], wordWeight: extra.wordWeight || 0, targetWords: extra.wordWeight || 0 });
+                } else {
+                    targetChunk.items.push(extra);
+                    targetChunk.wordWeight += extra.wordWeight || 0;
+                }
+            }
+
+            let averageTargetWords = memorizeDays > 0 ? Math.ceil(totalWords / memorizeDays) : totalWords;
+            return { chunks, totalWords, targetWords: averageTargetWords };
+        }
+
         function buildAyahBasedSchedule(items, totalDays, pattern, examFreq) {
             let memorizeDays = getMemorizeDaysCount(totalDays, pattern);
-            let ayahsPerMemDay = Math.ceil(items.length / memorizeDays);
-            let cursor = 0;
+            let weightedPlan = buildWordWeightedMemorizationChunks(items, memorizeDays);
+            let memorizeChunkCursor = 0;
+            let memorizeSeq = 0;
             let schedule = [];
-            let memorizedSoFar = [];
 
             for (let day = 1; day <= totalDays; day++) {
                 let dayType = getDayType(day, pattern, totalDays);
                 let dayItems = [];
                 let reviewItems = [];
+                let dayWordWeight = 0;
+                let targetWordWeight = weightedPlan.targetWords || 0;
 
                 if (dayType === 'memorize') {
-                    dayItems = items.slice(cursor, Math.min(cursor + ayahsPerMemDay, items.length));
-                    cursor += dayItems.length;
-                    memorizedSoFar = memorizedSoFar.concat(dayItems);
+                    memorizeSeq++;
+                    let chunk = weightedPlan.chunks[memorizeChunkCursor] || { items: [], wordWeight: 0, targetWords: targetWordWeight };
+                    dayItems = chunk.items || [];
+                    dayWordWeight = chunk.wordWeight || 0;
+                    targetWordWeight = chunk.targetWords || targetWordWeight;
+                    memorizeChunkCursor++;
 
                     if (pattern === 'daily-review' && schedule.length > 0) {
                         let recentMemDays = schedule.filter(d => d.type === 'memorize' && d.ayahItems && d.ayahItems.length).slice(-2);
                         reviewItems = recentMemDays.flatMap(d => d.ayahItems);
                     }
                 } else {
-                    let recentMemDays = schedule.filter(d => d.type === 'memorize' && d.ayahItems && d.ayahItems.length).slice(-3);
-                    reviewItems = recentMemDays.flatMap(d => d.ayahItems);
+                    // يوم التسميع/المراجعة لا يحتوي حفظاً جديداً.
+                    // الافتراضي الصحيح هنا: التسميع من بداية الخطة حتى آخر آية تم إدخالها قبل هذا اليوم،
+                    // حتى لا تختفي أي صفحة أو آية من أيام التسميع الأسبوعية.
+                    let allPreviousMemDays = schedule.filter(d => d.type === 'memorize' && d.ayahItems && d.ayahItems.length);
+                    reviewItems = allPreviousMemDays.flatMap(d => d.ayahItems);
                     dayItems = reviewItems;
+                    dayWordWeight = dayItems.reduce((sum, item) => sum + (item.wordWeight || countAyahWordsForPlan(item.text, item.surahNum, item.ayahNum)), 0);
                 }
 
                 let summary = summarizeAyahRange(dayItems);
@@ -1288,13 +1404,15 @@
                     endSurah: summary.endSurah,
                     endAyah: summary.endAyah,
                     ayahCount: summary.ayahCount,
+                    wordWeight: dayWordWeight,
+                    targetWordWeight,
                     rangeText: summary.text,
                     shortRangeText: summary.shortText,
                     ayahItems: dayItems,
                     reviewItems,
                     reviewText: reviewItems.length ? reviewSummary.text : '',
                     completed: false,
-                    examDay: shouldBeExamDay(day, examFreq, dayType)
+                    examDay: shouldBeExamDay(day, examFreq, dayType, pattern, memorizeSeq)
                 });
             }
             return schedule;
@@ -1379,9 +1497,12 @@
             document.getElementById('mem-custom-pattern').style.display = (pattern === 'custom') ? 'block' : 'none';
 
             let items = getPlanAyahItems(selection);
+            let weightedItems = enrichPlanItemsWithWordWeights(items);
             let memorizeDays = getMemorizeDaysCount(days, pattern);
-            let dailyAyahs = items.length ? Math.ceil(items.length / memorizeDays) : 0;
-            let firstLast = summarizeAyahRange(items);
+            let totalWords = weightedItems.reduce((sum, item) => sum + (item.wordWeight || 0), 0);
+            let targetWords = memorizeDays ? Math.ceil(totalWords / memorizeDays) : 0;
+            let firstLast = summarizeAyahRange(weightedItems);
+            let pagesCount = items.length ? (new Set(items.map(item => item.page))).size : 0;
 
             let warning = '';
             if ((selection.type === 'juz-list' && selection.juzs.length === 0) || (selection.type === 'surah-list' && selection.surahs.length === 0)) {
@@ -1393,9 +1514,8 @@
                 <div><i class="fas fa-book" style="color:var(--gold);"></i> <strong>النطاق:</strong> ${selection.label}</div>
                 <div><i class="fas fa-map-marker-alt" style="color:var(--gold);"></i> <strong>من/إلى:</strong> ${items.length ? firstLast.text : 'غير محدد بعد'}</div>
                 <div><i class="fas fa-list-ol" style="color:var(--gold);"></i> <strong>عدد الآيات:</strong> ${formatArabicPageNumber(items.length)} آية</div>
-                <div><i class="fas fa-calendar" style="color:var(--gold);"></i> <strong>المدة:</strong> ${formatArabicPageNumber(days)} يوم</div>
-                <div><i class="fas fa-bullseye" style="color:var(--gold);"></i> <strong>أيام الحفظ:</strong> ${formatArabicPageNumber(memorizeDays)} يوم</div>
-                <div><i class="fas fa-calculator" style="color:var(--gold);"></i> <strong>المتوسط اليومي:</strong> ~${formatArabicPageNumber(dailyAyahs)} آية/يوم حفظ</div>`;
+                <div><i class="fas fa-copy" style="color:var(--gold);"></i> <strong>عدد الصفحات:</strong> ${formatArabicPageNumber(pagesCount)} صفحة</div>
+                <div style="color:var(--text-muted); font-size:11px; margin-top:6px;"><i class="fas fa-scale-balanced" style="color:var(--gold);"></i> يتم التقسيم داخلياً حسب وزن الكلمات المتبقية وأيام الحفظ المتبقية، مع منع قطع أي آية بين يومين.</div>`;
         }
 
         function createMemPlan() {
@@ -1404,7 +1524,7 @@
             let pattern = document.getElementById('mem-plan-pattern').value;
             let examFreq = document.getElementById('mem-exam-freq').value;
             let selection = getMemScopeSelection();
-            let items = getPlanAyahItems(selection);
+            let items = enrichPlanItemsWithWordWeights(getPlanAyahItems(selection));
 
             if (items.length === 0) {
                 alert('يرجى اختيار نطاق صالح للخطة: القرآن كاملاً، أو جزء/أجزاء، أو سورة/سور.');
@@ -1424,6 +1544,8 @@
                 pattern,
                 examFreq,
                 totalAyahs: items.length,
+                totalWords: items.reduce((sum, item) => sum + (item.wordWeight || 0), 0),
+                scheduleMethod: 'word-weight-no-ayah-split',
                 rangeText: firstLast.text,
                 ayahItems: items,
                 schedule,
@@ -1462,16 +1584,21 @@
                         <div style="color:var(--text-muted);">السور المكتملة: <span style="color:var(--gold); font-weight:bold;">${stats.completedSurahs.length}</span></div>
                     </div>
                     ${currentDay ? `
-                    <div style="margin-top:15px; padding:10px; background:var(--bg-dark); border-radius:8px; border:1px dashed var(--gold);">
-                        <div style="color:var(--gold); font-weight:bold; margin-bottom:5px;"><i class="fas fa-calendar-day"></i> اليوم الحالي: يوم ${plan.schedule.indexOf(currentDay) + 1}</div>
-                        <div style="color:var(--text-main); font-size:13px; line-height:1.8;">
-                            ${currentDay.type === 'memorize' ? '📖 حفظ جديد' : '🔄 مراجعة'}: ${currentDay.rangeText}<br>
+                    <div class="mem-current-day-card">
+                        <div class="current-title"><i class="fas fa-location-dot"></i> ${currentDay.type === 'memorize' ? 'حفظ اليوم الحالي' : 'تسميع/مراجعة اليوم الحالي'}: يوم ${formatArabicPageNumber(plan.schedule.indexOf(currentDay) + 1)}</div>
+                        <div class="current-range">
+                            ${currentDay.type === 'memorize' ? '📖 حفظ جديد' : '🎙️ تسميع/مراجعة فقط بدون حفظ جديد'}: ${currentDay.rangeText}<br>
                             عدد الآيات: ${formatArabicPageNumber(currentDay.ayahCount)} | الصفحات: ${formatArabicPageNumber(currentDay.startPage)} - ${formatArabicPageNumber(currentDay.endPage)}
+                            ${currentDay.wordWeight ? `<br>وزن الكلمات التقريبي: ${formatArabicPageNumber(currentDay.wordWeight)} كلمة` : ''}
                             ${currentDay.reviewText ? `<br>مراجعة مرافقة: ${currentDay.reviewText}` : ''}
                         </div>
-                        <div style="margin-top:10px; display:flex; gap:8px;">
-                            <button class="btn btn-success" style="flex:1; padding:8px; font-size:12px;" onclick="startMemPlanReading(${idx})"><i class="fas fa-play"></i> ابدأ الحفظ</button>
-                            ${currentDay.examDay ? `<button class="btn btn-info" style="flex:1; padding:8px; font-size:12px;" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-clipboard-check"></i> امتحان</button>` : ''}
+                        ${getMemPlanLastPosition(idx, plan.schedule.indexOf(currentDay)) ? `<div class="mem-last-position-pill" onclick="resumeMemPlanLastPosition(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-bookmark"></i> آخر موضع: ${formatMemAyahLabel(getMemPlanLastPosition(idx, plan.schedule.indexOf(currentDay)).key)} - متابعة الحفظ</div>` : ''}
+                        <div class="current-actions">
+                            <button class="btn btn-success" onclick="startMemPlanReading(${idx})"><i class="fas fa-play"></i> ${currentDay.type === 'memorize' ? 'ابدأ الحفظ' : 'ابدأ التسميع/المراجعة'}</button>
+                            ${currentDay.type === 'memorize' ? `<button class="btn btn-info" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)}, 'current-day')"><i class="fas fa-microphone-alt"></i> تسميع ورد اليوم</button>` : ''}
+                            ${getMemPlanLastPosition(idx, plan.schedule.indexOf(currentDay)) ? `<button class="btn btn-info" onclick="resumeMemPlanLastPosition(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-bookmark"></i> متابعة من آخر موضع</button>` : ''}
+                            ${(currentDay.examDay && currentDay.type !== 'memorize') ? `<button class="btn btn-info" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)}, 'all-to-date')"><i class="fas fa-microphone-alt"></i> تسميع تراكمي</button>` : ''}
+                            ${(currentDay.examDay && currentDay.type === 'memorize') ? `<button class="btn btn-info" onclick="startMemExam(${idx}, ${plan.schedule.indexOf(currentDay)})"><i class="fas fa-clipboard-check"></i> امتحان</button>` : ''}
                         </div>
                     </div>` : `
                     <div style="margin-top:15px; padding:10px; background:rgba(34,197,94,0.1); border-radius:8px; border:1px solid var(--success);">
@@ -1487,11 +1614,14 @@
 
             plan.schedule.forEach((day, dayIdx) => {
                 let dayClass = day.completed ? 'completed' : day.type;
-                let isCurrent = !day.completed && plan.schedule.slice(0, dayIdx).every(d => d.completed);
+                let activeDayIdx = getActiveMemPlanDayIdx(plan);
+                let isCurrent = activeDayIdx === dayIdx;
+                let isFuture = activeDayIdx !== -1 && dayIdx > activeDayIdx;
                 if (isCurrent) dayClass += ' current';
+                if (isFuture) dayClass += ' future';
                 let title = `${day.type === 'memorize' ? 'حفظ' : 'مراجعة'}: ${day.rangeText} (${day.ayahCount} آية)`;
                 if (day.examDay) title += ' (مع امتحان)';
-                html += `<div class="mem-day-badge ${dayClass}" title="${title}" onclick="openDayDetail(${idx}, ${dayIdx})">${day.day}</div>`;
+                html += `<div class="mem-day-badge ${dayClass}" title="${title}" onclick="openDayDetail(${idx}, ${dayIdx})">${formatArabicPageNumber(day.day)}</div>`;
             });
 
             html += `</div>
@@ -1505,22 +1635,109 @@
             document.getElementById('mem-detail-content').innerHTML = html;
         }
 
+        function getActiveMemPlanDayIdx(plan) {
+            if (!plan || !Array.isArray(plan.schedule)) return -1;
+            return plan.schedule.findIndex(d => !d.completed);
+        }
+
+        function isActiveMemPlanDay(planIdx, dayIdx) {
+            let plan = memPlans[planIdx];
+            return getActiveMemPlanDayIdx(plan) === dayIdx;
+        }
+
+        function isFutureMemPlanDay(planIdx, dayIdx) {
+            let plan = memPlans[planIdx];
+            let activeIdx = getActiveMemPlanDayIdx(plan);
+            return activeIdx !== -1 && dayIdx > activeIdx;
+        }
+
+        function setGlobalQuranLastPosition(ayahKey) {
+            let ayah = findAyahByKey(ayahKey);
+            if (!ayah) return;
+            localStorage.setItem('quran_last_position', JSON.stringify({
+                key: ayah.key,
+                page: ayah.page,
+                surahIdx: ayah.surahIdx,
+                updatedAt: new Date().toISOString()
+            }));
+            localStorage.setItem('quran_bookmark_page', ayah.page);
+            localStorage.setItem('quran_bookmark_surah_idx', ayah.surahIdx);
+        }
+
+        function getGlobalQuranLastPosition() {
+            try { return JSON.parse(localStorage.getItem('quran_last_position')) || null; }
+            catch (e) { return null; }
+        }
+
+        function getMemPlanLastPosition(planIdx, dayIdx) {
+            let plan = memPlans[planIdx];
+            if (!plan || !plan.lastPositions) return null;
+            return plan.lastPositions[String(dayIdx)] || null;
+        }
+
+        function setMemPlanLastPosition(planIdx, dayIdx, ayahKey) {
+            let plan = memPlans[planIdx];
+            let ayah = findAyahByKey(ayahKey);
+            if (!plan || !ayah) return;
+            if (!plan.lastPositions) plan.lastPositions = {};
+            plan.lastPositions[String(dayIdx)] = { key: ayah.key, page: ayah.page, updatedAt: new Date().toISOString() };
+            localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
+        }
+
+        function formatMemAyahLabel(key) {
+            let ayah = findAyahByKey(key);
+            if (!ayah) return 'موضع محفوظ';
+            return `${ayah.surahName} ${formatArabicPageNumber(ayah.ayahNum)}`;
+        }
+
+        function resumeMemPlanLastPosition(planIdx, dayIdx) {
+            let last = getMemPlanLastPosition(planIdx, dayIdx);
+            if (last && last.key) goToAyahFromPlan(last.key, planIdx, dayIdx);
+            else {
+                let plan = memPlans[planIdx];
+                let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
+                if (day && day.startSurah && day.startAyah) goToAyahFromPlan(`${day.startSurah}_${day.startAyah}`, planIdx, dayIdx);
+            }
+        }
+
+        function getFirstDayAyahKeyOnPage(day, page) {
+            if (!day || !Array.isArray(day.ayahItems)) return null;
+            let found = day.ayahItems.find(a => a.page === page);
+            return found ? found.key : null;
+        }
+
         function openDayDetail(planIdx, dayIdx) {
             let plan = memPlans[planIdx];
             let day = plan.schedule[dayIdx];
             currentMemPlanId = planIdx;
             currentMemDayIdx = dayIdx;
-            document.getElementById('day-detail-title').innerText = `يوم ${day.day} - ${day.type === 'memorize' ? 'حفظ' : 'مراجعة'}`;
+            document.getElementById('day-detail-title').innerText = `يوم ${day.day} - ${day.type === 'memorize' ? 'حفظ' : 'تسميع/مراجعة'}`;
             document.getElementById('day-detail-subtitle').innerText = `${day.rangeText} | ${formatArabicPageNumber(day.ayahCount)} آية`;
 
+            let activeIdx = getActiveMemPlanDayIdx(plan);
+            let dayStatusText = day.completed ? 'هذا اليوم مكتمل ويمكنك مراجعته أو إلغاء إكماله.' : (activeIdx === dayIdx ? (day.type === 'memorize' ? 'هذا هو اليوم النشط في الخطة، ويمكن تسجيله كمكتمل بعد الحفظ.' : 'هذا يوم تسميع/مراجعة فقط بدون حفظ جديد، ويمكن تسجيله كمكتمل بعد التسميع.') : 'هذا يوم للمعاينة فقط؛ لا يظهر زر الإكمال حتى تصل إليه حسب ترتيب الخطة.');
+            let lastPos = getMemPlanLastPosition(planIdx, dayIdx);
             let pagesHtml = `
                 <div style="grid-column:1/-1; background:var(--bg-dark); border:1px dashed var(--gold); border-radius:10px; padding:12px; text-align:right; line-height:1.8;">
                     <div style="color:var(--gold); font-weight:bold;"><i class="fas fa-route"></i> نطاق اليوم</div>
                     <div style="font-size:13px; color:var(--text-main);">${day.rangeText}</div>
                     <div style="font-size:12px; color:var(--text-muted);">عدد الآيات: ${formatArabicPageNumber(day.ayahCount)} | الصفحات: ${formatArabicPageNumber(day.startPage)} - ${formatArabicPageNumber(day.endPage)}</div>
+                    <div style="font-size:11px; color:${activeIdx === dayIdx ? 'var(--success)' : (day.completed ? 'var(--gold)' : 'var(--warning)')}; margin-top:6px;">${dayStatusText}</div>
+                    ${lastPos ? `<div class="mem-last-position-pill" onclick="resumeMemPlanLastPosition(${planIdx}, ${dayIdx})"><i class="fas fa-bookmark"></i> آخر موضع: ${formatMemAyahLabel(lastPos.key)}</div>` : ''}
                     ${day.reviewText ? `<div style="font-size:12px; color:var(--info); margin-top:6px;">مراجعة مرافقة: ${day.reviewText}</div>` : ''}
                 </div>`;
 
+            if (day.ayahItems && day.ayahItems.length) {
+                pagesHtml += `<div style="grid-column:1/-1; color:var(--gold); font-weight:bold; font-size:13px; margin-top:6px;"><i class="fas fa-location-crosshairs"></i> اختر آية للانتقال المباشر</div>`;
+                pagesHtml += `<div class="mem-ayah-grid">`;
+                day.ayahItems.forEach(item => {
+                    let lastClass = lastPos && lastPos.key === item.key ? ' last-position' : '';
+                    pagesHtml += `<div class="mem-ayah-jump${lastClass}" onclick="goToAyahFromPlan('${item.key}', ${planIdx}, ${dayIdx})" title="${item.surahName} آية ${item.ayahNum}"><div class="ayah-num">${formatArabicPageNumber(item.ayahNum)}</div><div class="ayah-surah">${item.surahName}</div></div>`;
+                });
+                pagesHtml += `</div>`;
+            }
+
+            pagesHtml += `<div style="grid-column:1/-1; color:var(--text-muted); font-size:12px; margin-top:8px;">أو انتقل حسب صفحات اليوم:</div>`;
             for (let p = day.startPage; p <= day.endPage && p <= 604; p++) {
                 let juzNum = getJuzFromPage(p);
                 pagesHtml += `
@@ -1532,16 +1749,28 @@
             document.getElementById('day-pages-list').innerHTML = pagesHtml;
 
             let completeBtn = document.getElementById('day-complete-btn');
+            completeBtn.style.display = 'block';
+            completeBtn.disabled = false;
+            completeBtn.classList.remove('btn-success', 'btn-danger');
+
             if (day.completed) {
                 completeBtn.innerHTML = '<i class="fas fa-undo"></i> إلغاء الإكمال';
-                completeBtn.classList.remove('btn-success');
                 completeBtn.classList.add('btn-danger');
-            } else {
-                completeBtn.innerHTML = '<i class="fas fa-check"></i> أكملت هذا اليوم';
-                completeBtn.classList.remove('btn-danger');
+                completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
+            } else if (isActiveMemPlanDay(planIdx, dayIdx)) {
+                completeBtn.innerHTML = (day.type === 'memorize' ? '<i class="fas fa-check"></i> أكملت هذا اليوم' : '<i class="fas fa-check"></i> أنهيت التسميع');
                 completeBtn.classList.add('btn-success');
+                completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
+            } else {
+                completeBtn.innerHTML = '<i class="fas fa-lock"></i> يوم مستقبلي - للمعاينة فقط';
+                completeBtn.disabled = true;
+                completeBtn.style.opacity = '0.55';
+                completeBtn.style.cursor = 'not-allowed';
             }
-            completeBtn.onclick = () => toggleDayComplete(planIdx, dayIdx);
+            if (!completeBtn.disabled) {
+                completeBtn.style.opacity = '';
+                completeBtn.style.cursor = '';
+            }
             document.getElementById('day-detail-overlay').style.display = 'flex';
         }
 
@@ -1556,7 +1785,8 @@
             closeDayDetail();
             let plan = memPlans[planIdx];
             let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
-            let targetPage = day && day.startPage ? day.startPage : page;
+            let targetPage = page || (day && day.startPage ? day.startPage : 1);
+            let targetAyahKey = getFirstDayAyahKeyOnPage(day, targetPage) || (day && day.startSurah && day.startAyah ? `${day.startSurah}_${day.startAyah}` : null);
             currentPageNum = targetPage;
             localStorage.setItem('quran_bookmark_page', targetPage);
             let pageAyahs = finalPageArray[targetPage] || [];
@@ -1566,6 +1796,7 @@
             }
             currentMemPlanId = planIdx;
             currentMemDayIdx = dayIdx;
+            if (targetAyahKey) { setMemPlanLastPosition(planIdx, dayIdx, targetAyahKey); setGlobalQuranLastPosition(targetAyahKey); }
             localStorage.setItem('quran_reader_was_open', 'true');
             switchSection('quran-sec', document.getElementById('nav-btn-quran'));
             document.getElementById('quran-index').style.display = 'none';
@@ -1573,10 +1804,41 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
-            setTimeout(() => scrollToMemPlanStartAyah(), 120);
+            setTimeout(() => scrollToMemPlanTargetAyah(targetAyahKey), 120);
+        }
+
+        function goToAyahFromPlan(ayahKey, planIdx, dayIdx) {
+            closeDayDetail();
+            let ayah = findAyahByKey(ayahKey);
+            let plan = memPlans[planIdx];
+            let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
+            if (!ayah || !day) return;
+            currentPageNum = ayah.page;
+            localStorage.setItem('quran_bookmark_page', currentPageNum);
+            currentSelectedSurahIdx = ayah.surahIdx;
+            localStorage.setItem('quran_bookmark_surah_idx', currentSelectedSurahIdx);
+            currentMemPlanId = planIdx;
+            currentMemDayIdx = dayIdx;
+            setMemPlanLastPosition(planIdx, dayIdx, ayah.key);
+            setGlobalQuranLastPosition(ayah.key);
+            localStorage.setItem('quran_reader_was_open', 'true');
+            switchSection('quran-sec', document.getElementById('nav-btn-quran'));
+            document.getElementById('quran-index').style.display = 'none';
+            document.getElementById('search-bar-div').style.display = 'none';
+            document.getElementById('quran-reader').style.display = 'block';
+            renderMushafText();
+            updateMemPlanReaderBar();
+            setTimeout(() => scrollToMemPlanTargetAyah(ayah.key), 120);
         }
 
         function toggleDayComplete(planIdx, dayIdx) {
+            let plan = memPlans[planIdx];
+            let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
+            if (!day) return;
+            if (!day.completed && !isActiveMemPlanDay(planIdx, dayIdx)) {
+                alert('هذا يوم مستقبلي في الخطة. يمكنك الاطلاع عليه، لكن لا يمكن تسجيله كمكتمل قبل إنهاء الأيام السابقة.');
+                return;
+            }
             memPlans[planIdx].schedule[dayIdx].completed = !memPlans[planIdx].schedule[dayIdx].completed;
             localStorage.setItem('quran_mem_plans', JSON.stringify(memPlans));
             let stats = getPlanCompletedStats(memPlans[planIdx], dayIdx);
@@ -1607,17 +1869,32 @@
             };
         }
 
-        function scrollToMemPlanStartAyah(instant = false) {
+        function scrollToMemPlanTargetAyah(targetKey = null, instant = false) {
             if (currentMemPlanId === null || currentMemDayIdx === null) return;
             let plan = memPlans[currentMemPlanId];
             let day = plan && plan.schedule ? plan.schedule[currentMemDayIdx] : null;
-            if (!day || !day.startSurah || !day.startAyah) return;
-            let startKey = `${day.startSurah}_${day.startAyah}`;
-            let el = document.querySelector(`.ayah-span[data-key="${startKey}"]`);
+            if (!day) return;
+            let startKey = day.startSurah && day.startAyah ? `${day.startSurah}_${day.startAyah}` : null;
+            let keyToFocus = targetKey || startKey;
+            if (!keyToFocus) return;
+            let el = document.querySelector(`.ayah-span[data-key="${keyToFocus}"]`);
+            if (!el && startKey) el = document.querySelector(`.ayah-span[data-key="${startKey}"]`);
             if (!el) return;
             document.querySelectorAll('.ayah-span.focused-active').forEach(s => s.classList.remove('focused-active'));
             el.classList.add('focused-active');
             el.scrollIntoView({ behavior: instant ? 'auto' : 'smooth', block: 'center' });
+        }
+
+        function scrollToMemPlanStartAyah(instant = false) {
+            scrollToMemPlanTargetAyah(null, instant);
+        }
+
+        function scrollToGlobalLastPosition(key) {
+            let el = document.querySelector(`.ayah-span[data-key="${key}"]`);
+            if (!el) return;
+            document.querySelectorAll('.ayah-span.focused-active').forEach(s => s.classList.remove('focused-active'));
+            el.classList.add('focused-active');
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         function updateMemPlanReaderBar() {
             let bar = document.getElementById('mem-plan-reader-bar');
@@ -1630,11 +1907,48 @@
             let progress = 0;
             if (day.endPage >= day.startPage) progress = Math.min(100, Math.max(0, Math.round(((currentPageNum - day.startPage + 1) / (day.endPage - day.startPage + 1)) * 100)));
             document.getElementById('mem-reader-progress').style.width = progress + '%';
+            let completeBtn = bar.querySelector('.mem-btn.mem-complete');
+            if (completeBtn) {
+                if (day.completed) {
+                    completeBtn.style.display = 'inline-block';
+                    completeBtn.disabled = false;
+                    completeBtn.innerHTML = '<i class="fas fa-undo"></i> إلغاء الإكمال';
+                } else if (isActiveMemPlanDay(currentMemPlanId, currentMemDayIdx)) {
+                    completeBtn.style.display = 'inline-block';
+                    completeBtn.disabled = false;
+                    completeBtn.innerHTML = day.type === 'memorize' ? '<i class="fas fa-check"></i> أكملت اليوم' : '<i class="fas fa-check"></i> أنهيت التسميع';
+                } else {
+                    completeBtn.style.display = 'none';
+                    completeBtn.disabled = true;
+                }
+            }
+            let examBtn = bar.querySelector('.mem-btn.mem-exam');
+            if (examBtn) {
+                if (day.type === 'memorize') {
+                    examBtn.style.display = 'inline-block';
+                    examBtn.disabled = false;
+                    examBtn.innerHTML = '<i class="fas fa-microphone-alt"></i> تسميع ورد اليوم';
+                    examBtn.onclick = () => startMemExam(currentMemPlanId, currentMemDayIdx, 'current-day');
+                } else if (day.examDay) {
+                    examBtn.style.display = 'inline-block';
+                    examBtn.disabled = false;
+                    examBtn.innerHTML = '<i class="fas fa-microphone-alt"></i> تسميع تراكمي';
+                    examBtn.onclick = () => startMemExam(currentMemPlanId, currentMemDayIdx, 'all-to-date');
+                } else {
+                    examBtn.style.display = 'none';
+                    examBtn.disabled = true;
+                    examBtn.onclick = () => startMemExamFromReader();
+                }
+            }
             bar.classList.add('active');
         }
 
         function completeCurrentMemDay() {
             if (currentMemPlanId !== null && currentMemDayIdx !== null) {
+                if (!memPlans[currentMemPlanId].schedule[currentMemDayIdx].completed && !isActiveMemPlanDay(currentMemPlanId, currentMemDayIdx)) {
+                    alert('هذا يوم مستقبلي في الخطة. يمكنك الاطلاع عليه، لكن لا يمكن تسجيله كمكتمل قبل إنهاء الأيام السابقة.');
+                    return;
+                }
                 toggleDayComplete(currentMemPlanId, currentMemDayIdx);
                 updateMemPlanReaderBar();
             }
@@ -1667,12 +1981,16 @@
                 items = day.ayahItems || [];
                 if (!items.length) items = day.reviewItems || [];
             } else if (scope === 'previous-day') {
-                let previousMemDay = plan.schedule.slice(0, dayIdx).reverse().find(d => (d.ayahItems || []).length);
+                let previousMemDay = plan.schedule.slice(0, dayIdx + 1).reverse().find(d => d.type === 'memorize' && (d.ayahItems || []).length);
                 items = previousMemDay ? (previousMemDay.ayahItems || []) : (day.ayahItems || []);
+            } else if (scope === 'last-3') {
+                items = plan.schedule.slice(0, dayIdx + 1).filter(d => d.type === 'memorize' && (d.ayahItems || []).length).slice(-3).flatMap(d => d.ayahItems || []);
             } else if (scope === 'week') {
-                items = plan.schedule.slice(Math.max(0, dayIdx - 6), dayIdx + 1).flatMap(d => d.ayahItems || []);
+                // آخر أسبوع حفظ فعلي = آخر 6 أيام حفظ، وليس آخر 7 أيام تقويمية.
+                items = plan.schedule.slice(0, dayIdx + 1).filter(d => d.type === 'memorize' && (d.ayahItems || []).length).slice(-6).flatMap(d => d.ayahItems || []);
             } else if (scope === 'all-to-date') {
-                items = scheduleUntilToday.flatMap(d => d.ayahItems || []);
+                // من بداية الخطة حتى آخر آية حفظ موجودة قبل/حتى هذا اليوم، بدون الاعتماد على نطاق يوم التسميع نفسه.
+                items = scheduleUntilToday.filter(d => d.type === 'memorize' && (d.ayahItems || []).length).flatMap(d => d.ayahItems || []);
             } else if (scope === 'review-queue') {
                 items = (plan.reviewQueue || []).map(r => findAyahByKey(r.key)).filter(Boolean);
             } else if (scope === 'juz') {
@@ -1693,33 +2011,35 @@
             if (currentMemPlanId !== null && currentMemDayIdx !== null) startMemExam(currentMemPlanId, currentMemDayIdx);
         }
 
-        function startMemExam(planIdx, dayIdx) {
+        function startMemExam(planIdx, dayIdx, forcedScope = null) {
             let plan = memPlans[planIdx];
             let day = plan && plan.schedule ? plan.schedule[dayIdx] : null;
             if (!plan || !day) return;
-            activeExamContext = { planIdx, dayIdx, examScope: 'current-day', examItems: [] };
-            showMemExamScopeSelector(planIdx, dayIdx);
+            let defaultScope = forcedScope || (day.type === 'review' ? 'all-to-date' : 'current-day');
+            activeExamContext = { planIdx, dayIdx, examScope: defaultScope, examItems: [] };
+            showMemExamScopeSelector(planIdx, dayIdx, defaultScope);
             document.getElementById('exam-overlay').style.display = 'flex';
         }
 
-        function showMemExamScopeSelector(planIdx, dayIdx) {
+        function showMemExamScopeSelector(planIdx, dayIdx, preferredScope = null) {
             let plan = memPlans[planIdx];
             let day = plan.schedule[dayIdx];
             let contentDiv = document.getElementById('exam-content');
             let options = [
-                { value: 'current-day', label: 'اليوم الحالي', desc: 'يمتحنك في آيات هذا اليوم فقط.' },
-                { value: 'previous-day', label: 'آخر يوم حفظ', desc: 'مفيد إذا كان اليوم الحالي يوم مراجعة أو امتحان.' },
-                { value: 'week', label: 'آخر أسبوع', desc: 'يشمل آخر 7 أيام حتى هذا اليوم.' },
-                { value: 'all-to-date', label: 'كل الخطة حتى اللحظة', desc: 'يشمل كل ما تم إدخاله في الخطة حتى هذا اليوم.' },
+                { value: 'current-day', label: 'ورد اليوم الحالي', desc: 'تسميع آيات اليوم الحالي فقط.' },
+                { value: 'previous-day', label: 'آخر يوم حفظ', desc: 'آخر ورد حفظ فعلي، حتى لو كان اليوم الحالي يوم تسميع.' },
+                { value: 'last-3', label: 'آخر 3 أيام حفظ', desc: 'يشمل آخر ثلاثة أوراد حفظ فعلية.' },
+                { value: 'week', label: 'آخر أسبوع حفظ', desc: 'يشمل آخر 6 أيام حفظ فعلية قبل يوم التسميع.' },
+                { value: 'all-to-date', label: 'من بداية الخطة حتى آخر محفوظ', desc: 'الخيار الأشمل، ويضمن عدم سقوط أي صفحة أو آية من التسميع.' },
                 { value: 'review-queue', label: 'آيات تحتاج مراجعة', desc: 'يمتحنك فقط في الآيات الخطأ أو المترددة أو قيد التثبيت.' }
             ];
             if (plan.examFreq === 'juz') options.splice(3, 0, { value: 'juz', label: 'الجزء الحالي', desc: 'يشمل آيات الجزء المرتبط بهذا اليوم.' });
-            let defaultScope = day.type === 'review' ? 'week' : 'current-day';
-            document.getElementById('exam-scope-text').innerText = `اختبار يوم ${formatArabicPageNumber(day.day)} - اختر نطاق الامتحان`;
+            let defaultScope = preferredScope || (day.type === 'review' ? 'all-to-date' : 'current-day');
+            document.getElementById('exam-scope-text').innerText = `تسميع يوم ${formatArabicPageNumber(day.day)} - اختر نطاق التسميع`;
             contentDiv.innerHTML = `
                 <div class="exam-question">
                     <div style="color:var(--gold); font-size:16px; font-weight:bold; margin-bottom:8px;"><i class="fas fa-layer-group"></i> ماذا يشمل هذا الامتحان؟</div>
-                    <div style="color:var(--text-muted); font-size:12px; line-height:1.8; margin-bottom:12px;">يوم الامتحان ليس مجرد زر "اكتمل". اختر النطاق المناسب، ثم اختر عدد الأسئلة، وبعدها يبدأ التسميع.</div>
+                    <div style="color:var(--text-muted); font-size:12px; line-height:1.8; margin-bottom:12px;">اختر نطاق التسميع المناسب، ثم عدد الأسئلة. الافتراضي في يوم التسميع هو من بداية الخطة حتى آخر محفوظ.</div>
                     <div style="display:grid; gap:8px;">
                         ${options.map(opt => {
                             let count = buildExamItemsForScope(plan, dayIdx, opt.value).length;
@@ -2834,8 +3154,10 @@
             currentSelectedSurahIdx = idx;
             localStorage.setItem('quran_bookmark_surah_idx', idx);
             if (viewMode === 'pages') {
+                let lastPosition = getGlobalQuranLastPosition();
+                let savedPage = parseInt(localStorage.getItem('quran_bookmark_page')) || null;
                 let startPage = surahStartPageMap[idx] || 1;
-                currentPageNum = startPage;
+                currentPageNum = (lastPosition && lastPosition.page) ? parseInt(lastPosition.page) : (savedPage || startPage);
                 localStorage.setItem('quran_bookmark_page', currentPageNum);
             }
             localStorage.setItem('quran_reader_was_open', 'true');
@@ -2963,6 +3285,8 @@
         }
 
         function handleAyahClick(key) {
+            setGlobalQuranLastPosition(key);
+            if (currentMemPlanId !== null && currentMemDayIdx !== null) setMemPlanLastPosition(currentMemPlanId, currentMemDayIdx, key);
             if (clickAction === 'audio') {
                 audioTrackingActive = true;
                 playAyahAudio(key);
