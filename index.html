@@ -1069,8 +1069,25 @@
                 player.addEventListener('timeupdate', updatePlayerProgress);
 
                 let savedReaderOpen = localStorage.getItem('quran_reader_was_open');
-                if(savedReaderOpen === 'true') { openSurahReader(currentSelectedSurahIdx); setTimeout(() => { let last = getGlobalQuranLastPosition(); if (last && last.key) scrollToGlobalLastPosition(last.key); }, 160); } 
-                else { updateWardUIProgress(); }
+                let resumeState = getReaderResumeState();
+                if(savedReaderOpen === 'true' || (resumeState && resumeState.readerOpen)) {
+                    if (resumeState) {
+                        if (resumeState.viewMode) viewMode = resumeState.viewMode;
+                        if (resumeState.page) currentPageNum = parseInt(resumeState.page) || currentPageNum;
+                        if (resumeState.surahIdx !== undefined && resumeState.surahIdx !== null) currentSelectedSurahIdx = parseInt(resumeState.surahIdx) || 0;
+                        if (resumeState.memPlanId !== null && resumeState.memPlanId !== undefined) currentMemPlanId = parseInt(resumeState.memPlanId);
+                        if (resumeState.memDayIdx !== null && resumeState.memDayIdx !== undefined) currentMemDayIdx = parseInt(resumeState.memDayIdx);
+                    }
+                    openSurahReader(currentSelectedSurahIdx, { restoreSaved: true, targetPage: currentPageNum });
+                    setTimeout(() => {
+                        let keyToScroll = resumeState && resumeState.key ? resumeState.key : null;
+                        if (!keyToScroll) {
+                            let last = getGlobalQuranLastPosition();
+                            if (last && last.key) keyToScroll = last.key;
+                        }
+                        if (keyToScroll) scrollToGlobalLastPosition(keyToScroll);
+                    }, 180);
+                } else { updateWardUIProgress(); }
             } catch (err) {
                 document.getElementById('quran-index').innerHTML = `<div style="color:var(--danger); text-align:center; padding:30px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> فشل اتصال المنصة بالخادم السحابي. يرجى التحقق من اتصال الإنترنت.</div>`;
             }
@@ -1804,6 +1821,7 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
+            saveReaderResumeState(true);
             setTimeout(() => scrollToMemPlanTargetAyah(targetAyahKey), 120);
         }
 
@@ -1828,6 +1846,7 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
+            saveReaderResumeState(true);
             setTimeout(() => scrollToMemPlanTargetAyah(ayah.key), 120);
         }
 
@@ -3126,14 +3145,41 @@
             } 
         }
 
-        // ===== SAVE PAGE ON CLOSE =====
-        window.addEventListener('beforeunload', () => {
+        // ===== SAVE / RESTORE READER POSITION =====
+        function getFocusedAyahKeyForResume() {
+            let focused = document.querySelector('.ayah-span.focused-active');
+            if (focused && focused.dataset && focused.dataset.key) return focused.dataset.key;
+            let last = getGlobalQuranLastPosition();
+            return last && last.key ? last.key : null;
+        }
+
+        function saveReaderResumeState(forceReaderOpen = null) {
+            let reader = document.getElementById('quran-reader');
+            let isReaderOpen = forceReaderOpen !== null ? forceReaderOpen : !!(reader && reader.style.display !== 'none');
+            let state = {
+                readerOpen: isReaderOpen,
+                page: currentPageNum,
+                surahIdx: currentSelectedSurahIdx,
+                viewMode: viewMode,
+                memPlanId: currentMemPlanId,
+                memDayIdx: currentMemDayIdx,
+                key: isReaderOpen ? getFocusedAyahKeyForResume() : null,
+                updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('quran_resume_state', JSON.stringify(state));
             localStorage.setItem('quran_bookmark_page', currentPageNum);
             localStorage.setItem('quran_bookmark_surah_idx', currentSelectedSurahIdx);
-            if (document.getElementById('quran-reader').style.display !== 'none') {
-                localStorage.setItem('quran_reader_was_open', 'true');
-            }
-        });
+            if (isReaderOpen) localStorage.setItem('quran_reader_was_open', 'true');
+            else localStorage.removeItem('quran_reader_was_open');
+        }
+
+        function getReaderResumeState() {
+            try { return JSON.parse(localStorage.getItem('quran_resume_state')) || null; }
+            catch (e) { return null; }
+        }
+
+        window.addEventListener('beforeunload', () => saveReaderResumeState());
+        window.addEventListener('pagehide', () => saveReaderResumeState());
 
         
         // ===== MISSING CORE FUNCTIONS =====
@@ -3150,14 +3196,23 @@
             return null;
         }
 
-        function openSurahReader(idx) {
+        function openSurahReader(idx, options = {}) {
             currentSelectedSurahIdx = idx;
             localStorage.setItem('quran_bookmark_surah_idx', idx);
             if (viewMode === 'pages') {
-                let lastPosition = getGlobalQuranLastPosition();
-                let savedPage = parseInt(localStorage.getItem('quran_bookmark_page')) || null;
                 let startPage = surahStartPageMap[idx] || 1;
-                currentPageNum = (lastPosition && lastPosition.page) ? parseInt(lastPosition.page) : (savedPage || startPage);
+                let savedPage = parseInt(localStorage.getItem('quran_bookmark_page')) || null;
+                let resumeState = getReaderResumeState();
+                let resumePage = resumeState && resumeState.page ? parseInt(resumeState.page) : null;
+
+                if (options.targetPage) {
+                    currentPageNum = parseInt(options.targetPage) || startPage;
+                } else if (options.restoreSaved) {
+                    currentPageNum = resumePage || savedPage || startPage;
+                } else {
+                    // فتح مقصود من الفهرس أو البحث: لا تجعل آخر موضع محفوظ يطغى على السورة المطلوبة.
+                    currentPageNum = startPage;
+                }
                 localStorage.setItem('quran_bookmark_page', currentPageNum);
             }
             localStorage.setItem('quran_reader_was_open', 'true');
@@ -3166,6 +3221,7 @@
             document.getElementById('quran-reader').style.display = 'block';
             renderMushafText();
             updateMemPlanReaderBar();
+            saveReaderResumeState(true);
         }
 
         function closeReader() {
@@ -3178,6 +3234,7 @@
             currentMemPlanId = null;
             currentMemDayIdx = null;
             document.getElementById('mem-plan-reader-bar').classList.remove('active');
+            saveReaderResumeState(false);
         }
 
         function navigatePage(direction) {
@@ -3188,6 +3245,7 @@
                     localStorage.setItem('quran_bookmark_page', currentPageNum);
                     renderMushafText();
                     updateMemPlanReaderBar();
+                    saveReaderResumeState(true);
                 }
             } else {
                 let newIdx = currentSelectedSurahIdx + direction;
@@ -3195,6 +3253,7 @@
                     currentSelectedSurahIdx = newIdx;
                     localStorage.setItem('quran_bookmark_surah_idx', newIdx);
                     renderMushafText();
+                    saveReaderResumeState(true);
                 }
             }
         }
@@ -3287,6 +3346,7 @@
         function handleAyahClick(key) {
             setGlobalQuranLastPosition(key);
             if (currentMemPlanId !== null && currentMemDayIdx !== null) setMemPlanLastPosition(currentMemPlanId, currentMemDayIdx, key);
+            saveReaderResumeState(true);
             if (clickAction === 'audio') {
                 audioTrackingActive = true;
                 playAyahAudio(key);
@@ -3436,13 +3496,18 @@
             document.getElementById('surah-search').value = '';
 
             if (type === 'surah') {
-                openSurahReader(surahIdx);
+                currentMemPlanId = null;
+                currentMemDayIdx = null;
+                openSurahReader(surahIdx, { targetPage: surahStartPageMap[surahIdx] || 1 });
             } else {
                 currentPageNum = page;
                 currentSelectedSurahIdx = surahIdx;
+                currentMemPlanId = null;
+                currentMemDayIdx = null;
                 localStorage.setItem('quran_bookmark_page', page);
                 localStorage.setItem('quran_bookmark_surah_idx', surahIdx);
-                openSurahReader(surahIdx);
+                if (ayahKey) setGlobalQuranLastPosition(ayahKey);
+                openSurahReader(surahIdx, { targetPage: page });
 
                 // Highlight the specific ayah
                 setTimeout(() => {
